@@ -134,7 +134,7 @@ export default function VoicesPage() {
                       
                       {char.prompt_style && (
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontStyle: 'italic' }}>
-                          "{char.prompt_style}"
+                          &quot;{char.prompt_style}&quot;
                         </Typography>
                       )}
                     </CardContent>

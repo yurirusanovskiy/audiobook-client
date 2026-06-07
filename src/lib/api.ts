@@ -95,3 +95,17 @@ export const sceneService = {
   extractScript: (id: string) => api.post(`/scenes/${id}/extract`).then(res => res.data),
   generateAudio: (id: string) => api.post(`/scenes/${id}/generate-audio`).then(res => res.data),
 };
+
+export interface DictionaryEntry {
+  id?: number;
+  language: string;
+  word: string;
+  phonetic_replacement: string;
+  entry_type?: "word" | "name" | "place";
+}
+
+export const dictionaryService = {
+  getEntries: (language?: string) => api.get<DictionaryEntry[]>('/dictionary', { params: { language } }).then(res => res.data),
+  createEntry: (data: DictionaryEntry) => api.post<DictionaryEntry>('/dictionary', data).then(res => res.data),
+  deleteEntry: (id: number) => api.delete(`/dictionary/${id}`).then(res => res.data),
+};
