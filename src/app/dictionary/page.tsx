@@ -9,19 +9,28 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import SearchIcon from '@mui/icons-material/Search';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dictionaryService, DictionaryEntry } from '@/lib/api';
 import DictionaryModal from '@/components/modals/DictionaryModal';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function DictionaryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DictionaryEntry | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const queryClient = useQueryClient();
 
   const { data: entries, isLoading, error } = useQuery({
     queryKey: ['dictionary'],
     queryFn: () => dictionaryService.getEntries(),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => dictionaryService.deleteEntry(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dictionary'] });
+    }
   });
 
 
@@ -177,6 +186,18 @@ export default function DictionaryPage() {
                         title="Edit Entry"
                       >
                         <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        sx={{ color: '#94A3B8', mr: 1, '&:hover': { color: '#FF5252', bgcolor: 'rgba(255, 82, 82, 0.1)' } }} 
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete the phonetic rule for "${entry.word}"?`)) {
+                            if (entry.id) deleteMutation.mutate(entry.id);
+                          }
+                        }}
+                        title="Delete Entry"
+                      >
+                        <DeleteIcon fontSize="small" />
                       </IconButton>
                       <IconButton size="small" sx={{ color: '#94A3B8' }} title="Play Pronunciation (Coming Soon)">
                         <VolumeUpIcon fontSize="small" />
