@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, MenuItem, CircularProgress, Box, IconButton, Typography
@@ -16,26 +16,12 @@ interface DictionaryModalProps {
 }
 
 export default function DictionaryModal({ open, onClose, initialData }: DictionaryModalProps) {
-  const [word, setWord] = useState('');
-  const [phoneticReplacement, setPhoneticReplacement] = useState('');
-  const [language, setLanguage] = useState('ru-RU');
-  const [entryType, setEntryType] = useState<DictionaryEntry['entry_type']>('word');
+  const [word, setWord] = useState(initialData?.word || '');
+  const [phoneticReplacement, setPhoneticReplacement] = useState(initialData?.phonetic_replacement || '');
+  const [language, setLanguage] = useState(initialData?.language || 'ru-RU');
+  const [entryType, setEntryType] = useState<DictionaryEntry['entry_type']>(initialData?.entry_type || 'word');
 
   const isEditing = !!initialData;
-
-  useEffect(() => {
-    if (initialData) {
-      setWord(initialData.word);
-      setPhoneticReplacement(initialData.phonetic_replacement);
-      setLanguage(initialData.language);
-      setEntryType(initialData.entry_type || 'word');
-    } else {
-      setWord('');
-      setPhoneticReplacement('');
-      setLanguage('ru-RU');
-      setEntryType('word');
-    }
-  }, [initialData, open]);
 
   const queryClient = useQueryClient();
 

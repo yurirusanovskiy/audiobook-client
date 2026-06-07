@@ -9,7 +9,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import SearchIcon from '@mui/icons-material/Search';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { dictionaryService, DictionaryEntry } from '@/lib/api';
 import DictionaryModal from '@/components/modals/DictionaryModal';
 import EditIcon from '@mui/icons-material/Edit';
@@ -18,19 +18,12 @@ export default function DictionaryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DictionaryEntry | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const queryClient = useQueryClient();
 
   const { data: entries, isLoading, error } = useQuery({
     queryKey: ['dictionary'],
     queryFn: () => dictionaryService.getEntries(),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => dictionaryService.deleteEntry(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dictionary'] });
-    }
-  });
 
   const filteredEntries = entries?.filter(entry => 
     entry.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -198,6 +191,7 @@ export default function DictionaryPage() {
       </Container>
 
       <DictionaryModal 
+        key={editingEntry ? `edit-${editingEntry.id}` : 'new'}
         open={modalOpen} 
         onClose={() => setModalOpen(false)} 
         initialData={editingEntry} 

@@ -7,9 +7,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useQuery } from '@tanstack/react-query';
 import { projectService } from '@/lib/api';
