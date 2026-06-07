@@ -5,6 +5,7 @@ import {
   Box, Typography, Button, Card, CardContent, Grid2, CircularProgress, 
   Container 
 } from '@mui/material';
+import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useQuery } from '@tanstack/react-query';
@@ -83,31 +84,33 @@ export default function ProjectsPage() {
           <Grid2 container spacing={3}>
             {projects?.map((project) => (
               <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    '&:hover': { borderColor: 'primary.main', boxShadow: 2 }
-                  }}
-                >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" gutterBottom fontWeight="600">
-                      {project.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Language: {project.language_code || 'ru-RU'}
-                    </Typography>
-                    {project.description && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        {project.description}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid2>
+                <Link href={`/projects/${project.id}`} style={{ textDecoration: 'none' }}>
+                    <Card 
+                      variant="outlined" 
+                      sx={{ 
+                        height: '100%', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        cursor: 'pointer',
+                        '&:hover': { borderColor: 'primary.main', boxShadow: 2 }
+                      }}
+                    >
+                      <CardContent sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" gutterBottom fontWeight="600" color="text.primary">
+                          {project.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Language: {project.language_code || 'ru-RU'}
+                        </Typography>
+                        {project.description && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                            {project.description}
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </Grid2>
             ))}
           </Grid2>
         )}
