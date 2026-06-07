@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { 
   Box, Typography, Button, Card, CardContent, Grid2, CircularProgress, 
-  Container, AppBar, Toolbar 
+  Container 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -22,26 +22,23 @@ export default function ProjectsPage() {
   });
 
   return (
-    <Box sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Audiobook Projects
-          </Typography>
-          {projects && projects.length > 0 && (
-            <Button 
-              variant="contained" 
-              startIcon={<CloudUploadIcon />}
-              onClick={() => setUploadOpen(true)}
-              sx={{ mr: 2 }}
-            >
-              Upload Book
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+          Your Projects
+        </Typography>
+        {projects && projects.length > 0 && (
+          <Button 
+            variant="contained" 
+            startIcon={<CloudUploadIcon />}
+            onClick={() => setUploadOpen(true)}
+          >
+            Upload Book
+          </Button>
+        )}
+      </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, px: 0 }}>
         {isLoading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
             <CircularProgress />
