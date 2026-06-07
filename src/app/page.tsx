@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { 
-  Box, Typography, Button, Card, CardContent, Grid2, CircularProgress, 
+  Box, Typography, Button, Card, CardContent, Grid, CircularProgress, 
   Container 
 } from '@mui/material';
 import Link from 'next/link';
@@ -41,27 +41,20 @@ export default function ProjectsPage() {
 
       <Container maxWidth="lg" sx={{ flexGrow: 1, px: 0 }}>
         {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
             <CircularProgress />
           </Box>
         ) : error ? (
           <Typography color="error">Failed to load projects. Ensure backend is running.</Typography>
         ) : projects?.length === 0 ? (
-          <Box 
-            display="flex" 
-            flexDirection="column" 
-            alignItems="center" 
-            justifyContent="center" 
-            height="60vh"
-            gap={4}
-          >
-            <Typography variant="h4" color="text.secondary" fontWeight="500">
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 4 }}>
+            <Typography variant="h4" color="text.secondary" sx={{ fontWeight: '500' }}>
               No Projects Yet
             </Typography>
-            <Typography variant="body1" color="text.secondary" textAlign="center" maxWidth="sm">
+            <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', maxWidth: 'sm' }}>
               Start by uploading an entire book (.txt). We&apos;ll automatically break it down into scenes and cast the characters using AI.
             </Typography>
-            <Box display="flex" gap={2}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <Button 
                 variant="contained" 
                 size="large" 
@@ -81,9 +74,9 @@ export default function ProjectsPage() {
             </Box>
           </Box>
         ) : (
-          <Grid2 container spacing={3}>
+          <Grid container spacing={3}>
             {projects?.map((project) => (
-              <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
                 <Link href={`/projects/${project.id}`} style={{ textDecoration: 'none' }}>
                     <Card 
                       variant="outlined" 
@@ -96,7 +89,7 @@ export default function ProjectsPage() {
                       }}
                     >
                       <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="600" color="text.primary">
+                        <Typography variant="h6" gutterBottom color="text.primary" sx={{ fontWeight: '600' }}>
                           {project.title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -110,9 +103,9 @@ export default function ProjectsPage() {
                       </CardContent>
                     </Card>
                   </Link>
-                </Grid2>
+                </Grid>
             ))}
-          </Grid2>
+          </Grid>
         )}
       </Container>
 

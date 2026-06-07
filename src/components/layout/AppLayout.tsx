@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, boxShadow: 0, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default', color: 'text.primary' }}>
         <Toolbar>
-          <Typography variant="h6" noWrap component="div" fontWeight="bold">
+          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
             Audiobook TTS Engine
           </Typography>
         </Toolbar>
@@ -41,7 +41,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         anchor="left"
       >
         <Toolbar>
-          <Typography variant="h6" fontWeight="bold" sx={{ px: 2 }}>
+          <Typography variant="h6" sx={{ px: 2, fontWeight: 'bold' }}>
             Studio
           </Typography>
         </Toolbar>

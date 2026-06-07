@@ -54,13 +54,13 @@ export default function DictionaryPage() {
 
       <Container maxWidth="xl" sx={{ flexGrow: 1, px: 0 }}>
         {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="40vh">
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40vh' }}>
             <CircularProgress />
           </Box>
         ) : error ? (
           <Typography color="error">Failed to load dictionary. Ensure backend is running.</Typography>
         ) : entries?.length === 0 ? (
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="40vh">
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
             <Typography variant="h6" color="text.secondary">
               No phonetic rules found. Add one to correct AI pronunciation.
             </Typography>
@@ -84,7 +84,7 @@ export default function DictionaryPage() {
                     <TableCell sx={{ fontFamily: 'monospace' }}>{entry.phonetic_replacement}</TableCell>
                     <TableCell>{entry.language}</TableCell>
                     <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Chip 
                           label={entry.entry_type || 'word'} 
                           size="small" 

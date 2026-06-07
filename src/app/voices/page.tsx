@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { 
-  Box, Typography, Button, Card, CardContent, Grid2, CircularProgress, 
+  Box, Typography, Button, Card, CardContent, Grid, CircularProgress, 
   Container, TextField, InputAdornment, IconButton, Chip 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -61,12 +61,14 @@ export default function VoicesPage() {
           placeholder="Search voices by name or ID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }
           }}
           sx={{ maxWidth: 600, bgcolor: 'background.paper' }}
         />
@@ -74,19 +76,19 @@ export default function VoicesPage() {
 
       <Container maxWidth="xl" sx={{ flexGrow: 1, px: 0 }}>
         {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="40vh">
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40vh' }}>
             <CircularProgress />
           </Box>
         ) : error ? (
           <Typography color="error">Failed to load voices. Ensure backend is running.</Typography>
         ) : filteredCharacters.length === 0 ? (
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="40vh">
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
             <Typography variant="h6" color="text.secondary">
               No voices found.
             </Typography>
           </Box>
         ) : (
-          <Grid2 container spacing={3}>
+          <Grid container spacing={3}>
             {filteredCharacters.map((char) => {
               // Assume a character has an audio sample if logic dictates. 
               // For now, let's pretend every character has a potential sample, but we make it active.
@@ -94,7 +96,7 @@ export default function VoicesPage() {
               const isPlaying = playingId === char.id;
 
               return (
-                <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={char.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={char.id}>
                   <Card 
                     variant="outlined" 
                     sx={{ 
@@ -105,8 +107,8 @@ export default function VoicesPage() {
                     }}
                   >
                     <CardContent sx={{ flexGrow: 1 }}>
-                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                        <Typography variant="h6" fontWeight="bold">
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                           {char.name}
                         </Typography>
                         <IconButton 
@@ -119,7 +121,7 @@ export default function VoicesPage() {
                         </IconButton>
                       </Box>
                       
-                      <Box display="flex" gap={1} mb={2} flexWrap="wrap">
+                      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                         {char.gender && (
                           <Chip label={char.gender} size="small" variant="outlined" />
                         )}
@@ -139,10 +141,10 @@ export default function VoicesPage() {
                       )}
                     </CardContent>
                   </Card>
-                </Grid2>
+                </Grid>
               );
             })}
-          </Grid2>
+          </Grid>
         )}
       </Container>
 
