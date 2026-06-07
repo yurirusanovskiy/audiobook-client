@@ -1,14 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, Divider } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, Avatar } from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import TranslateIcon from '@mui/icons-material/Translate';
+import HeadphonesIcon from '@mui/icons-material/Headphones';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const drawerWidth = 240;
+const drawerWidth = 88; // Match Figma narrow sidebar
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,13 +22,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, boxShadow: 0, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default', color: 'text.primary' }}>
-        <Toolbar>
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
-            Audiobook TTS Engine
-          </Typography>
-        </Toolbar>
-      </AppBar>
       <Drawer
         sx={{
           width: drawerWidth,
@@ -35,48 +29,77 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            py: 3,
+            borderRight: '1px solid rgba(255, 255, 255, 0.05)',
           },
         }}
         variant="permanent"
         anchor="left"
       >
-        <Toolbar>
-          <Typography variant="h6" sx={{ px: 2, fontWeight: 'bold' }}>
-            Studio
-          </Typography>
-        </Toolbar>
-        <Divider />
-        <List>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding>
-              <ListItemButton 
-                component={Link} 
-                href={item.path}
-                selected={pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path))}
-                sx={{
-                  mx: 1,
-                  borderRadius: 1,
-                  '&.Mui-selected': {
-                    bgcolor: 'primary.light',
-                    color: 'primary.main',
-                    '& .MuiListItemIcon-root': {
-                      color: 'primary.main',
+        <Avatar 
+          sx={{ 
+            bgcolor: '#82B1FF', // Primary color
+            color: '#151A25', // Background color for contrast
+            width: 48, 
+            height: 48, 
+            borderRadius: 3, // Slightly rounded square
+            mb: 4 
+          }}
+        >
+          <HeadphonesIcon fontSize="medium" />
+        </Avatar>
+
+        <List sx={{ width: '100%', px: 0 }}>
+          {menuItems.map((item) => {
+            const isActive = pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path));
+            return (
+              <ListItem key={item.text} disablePadding sx={{ mb: 2, display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                {isActive && (
+                  <Box 
+                    sx={{ 
+                      position: 'absolute', 
+                      left: 0, 
+                      top: '50%', 
+                      transform: 'translateY(-50%)', 
+                      height: 32, 
+                      width: 4, 
+                      bgcolor: '#82B1FF', 
+                      borderTopRightRadius: 4, 
+                      borderBottomRightRadius: 4 
+                    }} 
+                  />
+                )}
+                <ListItemButton 
+                  component={Link} 
+                  href={item.path}
+                  sx={{
+                    justifyContent: 'center',
+                    borderRadius: 2,
+                    mx: 2,
+                    p: 1.5,
+                    bgcolor: isActive ? 'rgba(130, 177, 255, 0.08)' : 'transparent',
+                    color: isActive ? '#82B1FF' : '#94A3B8',
+                    '&:hover': {
+                      bgcolor: 'rgba(130, 177, 255, 0.12)',
+                      color: '#82B1FF',
                     }
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} sx={{ '& .MuiTypography-root': { fontWeight: 500 } }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 'auto', color: 'inherit' }}>
+                    {item.icon}
+                  </ListItemIcon>
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: 10, minHeight: '100vh' }}
+        sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
       >
         {children}
       </Box>

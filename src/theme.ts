@@ -4,24 +4,29 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
-    mode: 'dark', // Let's use a sleek dark mode as requested by "Premium Designs" guidelines
+    mode: 'dark',
     primary: {
-      main: '#90caf9',
-      light: '#e3f2fd',
-      dark: '#42a5f5',
+      main: '#82B1FF', // Light blue from Figma buttons
+      light: '#AECBFF',
+      dark: '#5B8CFF',
     },
     secondary: {
-      main: '#f48fb1',
-      light: '#fce4ec',
-      dark: '#ec407a',
+      main: '#FF8A80',
+      light: '#FFBCB5',
+      dark: '#FF5252',
     },
     background: {
-      default: '#0f172a', // Slate 900
-      paper: '#1e293b',   // Slate 800
+      default: '#151A25', // Main app background
+      paper: '#212836',   // Card background
     },
+    text: {
+      primary: '#FFFFFF',
+      secondary: '#94A3B8',
+    },
+    divider: 'rgba(255, 255, 255, 0.08)',
   },
   typography: {
-    fontFamily: 'var(--font-inter), Roboto, sans-serif',
+    fontFamily: 'var(--font-geist-sans), Roboto, sans-serif',
   },
   components: {
     MuiButton: {
@@ -29,18 +34,27 @@ const theme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 8,
-          fontWeight: 600,
+          fontWeight: 500,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 16,
           backgroundImage: 'none', // Remove default elevation overlay
+          border: '1px solid rgba(255, 255, 255, 0.05)',
         },
       },
     },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#10141D', // Sidebar background
+          borderRight: '1px solid rgba(255, 255, 255, 0.05)',
+        }
+      }
+    }
   },
 });
 

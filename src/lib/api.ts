@@ -107,5 +107,6 @@ export interface DictionaryEntry {
 export const dictionaryService = {
   getEntries: (language?: string) => api.get<DictionaryEntry[]>('/dictionary', { params: { language } }).then(res => res.data),
   createEntry: (data: DictionaryEntry) => api.post<DictionaryEntry>('/dictionary', data).then(res => res.data),
+  updateEntry: (id: number, data: DictionaryEntry) => api.put<DictionaryEntry>(`/dictionary/${id}`, data).then(res => res.data),
   deleteEntry: (id: number) => api.delete(`/dictionary/${id}`).then(res => res.data),
 };

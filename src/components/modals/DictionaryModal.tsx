@@ -1,23 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, MenuItem, CircularProgress, Box
+  Button, TextField, MenuItem, CircularProgress, Box, IconButton, Typography
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { dictionaryService, DictionaryEntry } from '@/lib/api';
 
 interface DictionaryModalProps {
   open: boolean;
   onClose: () => void;
+  initialData?: DictionaryEntry | null;
 }
 
-export default function DictionaryModal({ open, onClose }: DictionaryModalProps) {
+export default function DictionaryModal({ open, onClose, initialData }: DictionaryModalProps) {
   const [word, setWord] = useState('');
   const [phoneticReplacement, setPhoneticReplacement] = useState('');
   const [language, setLanguage] = useState('ru-RU');
   const [entryType, setEntryType] = useState<DictionaryEntry['entry_type']>('word');
+
+  const isEditing = !!initialData;
+
+  useEffect(() => {
+    if (initialData) {
+      setWord(initialData.word);
+      setPhoneticReplacement(initialData.phonetic_replacement);
+      setLanguage(initialData.language);
+      setEntryType(initialData.entry_type || 'word');
+    } else {
+      setWord('');
+      setPhoneticReplacement('');
+      setLanguage('ru-RU');
+      setEntryType('word');
+    }
+  }, [initialData, open]);
 
   const queryClient = useQueryClient();
 
@@ -25,22 +43,26 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
     mutationFn: async () => {
       if (!word || !phoneticReplacement) throw new Error("Word and phonetic replacement are required");
       
-      const newEntry: DictionaryEntry = {
+      const entryData: DictionaryEntry = {
         word,
         phonetic_replacement: phoneticReplacement,
         language,
         entry_type: entryType,
       };
       
-      return await dictionaryService.createEntry(newEntry);
+      if (isEditing && initialData.id) {
+        return await dictionaryService.updateEntry(initialData.id, entryData);
+      } else {
+        return await dictionaryService.createEntry(entryData);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dictionary'] });
       handleClose();
     },
     onError: (error) => {
-      console.error("Failed to add dictionary entry", error);
-      alert("Failed to add entry. Please try again.");
+      console.error("Failed to save dictionary entry", error);
+      alert("Failed to save entry. Please try again.");
     }
   });
 
@@ -53,11 +75,64 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
     onClose();
   };
 
+  const textFieldStyles = {
+    '& .MuiOutlinedInput-root': {
+      bgcolor: 'rgba(255,255,255,0.03)',
+      borderRadius: 2,
+      color: '#FFFFFF',
+      '& fieldset': {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+      },
+      '&:hover fieldset': {
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#82B1FF',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: '#94A3B8',
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#82B1FF',
+    }
+  };
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Dictionary Entry</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="sm" 
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: '#151A25',
+            backgroundImage: 'none',
+            borderRadius: 3,
+            border: '1px solid rgba(255,255,255,0.05)'
+          }
+        }
+      }}
+    >
+      <DialogTitle sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        pb: 1,
+        pt: 3,
+        px: 3
+      }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
+          {isEditing ? "Edit Dictionary Entry" : "Add Dictionary Entry"}
+        </Typography>
+        <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      
+      <DialogContent sx={{ px: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
           <TextField
             label="Word"
             fullWidth
@@ -65,6 +140,7 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
             onChange={(e) => setWord(e.target.value)}
             disabled={mutation.isPending}
             required
+            sx={textFieldStyles}
           />
           
           <TextField
@@ -74,6 +150,7 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
             onChange={(e) => setPhoneticReplacement(e.target.value)}
             disabled={mutation.isPending}
             required
+            sx={textFieldStyles}
           />
 
           <TextField
@@ -83,10 +160,12 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
             disabled={mutation.isPending}
+            sx={textFieldStyles}
           >
-            <MenuItem value="ru-RU">Russian</MenuItem>
-            <MenuItem value="ro-RO">Romanian</MenuItem>
-            <MenuItem value="en-US">English</MenuItem>
+            <MenuItem value="ru-RU">🇷🇺 Russian</MenuItem>
+            <MenuItem value="ro-RO">🇷🇴 Romanian</MenuItem>
+            <MenuItem value="en-US">🇺🇸 English</MenuItem>
+            <MenuItem value="he-IL">🇮🇱 Hebrew</MenuItem>
           </TextField>
 
           <TextField
@@ -96,6 +175,7 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
             value={entryType}
             onChange={(e) => setEntryType(e.target.value as DictionaryEntry['entry_type'])}
             disabled={mutation.isPending}
+            sx={textFieldStyles}
           >
             <MenuItem value="word">Word</MenuItem>
             <MenuItem value="name">Name</MenuItem>
@@ -103,14 +183,36 @@ export default function DictionaryModal({ open, onClose }: DictionaryModalProps)
           </TextField>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
+      
+      <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
+        <Button 
+          onClick={handleClose} 
+          disabled={mutation.isPending}
+          sx={{ color: '#94A3B8', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}
+        >
+          Cancel
+        </Button>
         <Button 
           onClick={() => mutation.mutate()} 
           variant="contained" 
           disabled={!word || !phoneticReplacement || mutation.isPending}
+          sx={{ 
+            bgcolor: '#82B1FF', 
+            color: '#0B1121',
+            px: 3,
+            borderRadius: 2,
+            fontWeight: 600,
+            textTransform: 'none',
+            '&:hover': {
+              bgcolor: '#AECBFF'
+            },
+            '&.Mui-disabled': {
+              bgcolor: 'rgba(130, 177, 255, 0.3)',
+              color: 'rgba(11, 17, 33, 0.5)'
+            }
+          }}
         >
-          {mutation.isPending ? <CircularProgress size={24} /> : "Add Entry"}
+          {mutation.isPending ? <CircularProgress size={24} sx={{ color: '#0B1121' }} /> : (isEditing ? "Save Changes" : "Add Entry")}
         </Button>
       </DialogActions>
     </Dialog>

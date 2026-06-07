@@ -4,17 +4,20 @@ import React, { useState } from 'react';
 import { 
   Box, Typography, Button, CircularProgress, 
   Container, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Chip, IconButton
+  TableHead, TableRow, Paper, Chip, IconButton, TextField, InputAdornment
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { dictionaryService } from '@/lib/api';
+import { dictionaryService, DictionaryEntry } from '@/lib/api';
 import DictionaryModal from '@/components/modals/DictionaryModal';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function DictionaryPage() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<DictionaryEntry | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 
   const { data: entries, isLoading, error } = useQuery({
@@ -29,81 +32,161 @@ export default function DictionaryPage() {
     }
   });
 
-  const getTypeColor = (type?: string) => {
-    switch (type) {
-      case 'name': return 'primary';
-      case 'place': return 'success';
-      default: return 'default';
-    }
-  };
+  const filteredEntries = entries?.filter(entry => 
+    entry.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    entry.phonetic_replacement.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
-          Phonetic Dictionary
-        </Typography>
+    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: 4 } }}>
+      {/* Header Area */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+        <Box>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: '#FFFFFF', mb: 1 }}>
+            Phonetic Dictionary
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#94A3B8' }}>
+            Custom pronunciation overrides for TTS engines
+          </Typography>
+        </Box>
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            setEditingEntry(null);
+            setModalOpen(true);
+          }}
+          sx={{ 
+            bgcolor: '#82B1FF', 
+            color: '#0B1121',
+            px: 3,
+            py: 1.5,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            '&:hover': {
+              bgcolor: '#AECBFF'
+            }
+          }}
         >
           Add Entry
         </Button>
       </Box>
 
-      <Container maxWidth="xl" sx={{ flexGrow: 1, px: 0 }}>
+      {/* Search Bar */}
+      <TextField
+        fullWidth
+        placeholder="Search words or phonetics..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        sx={{
+          mb: 4,
+          '& .MuiOutlinedInput-root': {
+            bgcolor: '#212836',
+            borderRadius: 2,
+            color: '#FFFFFF',
+            '& fieldset': {
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#82B1FF',
+            },
+          }
+        }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: '#94A3B8' }} />
+              </InputAdornment>
+            ),
+          }
+        }}
+      />
+
+      <Container maxWidth="xl" sx={{ flexGrow: 1, px: '0 !important' }}>
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40vh' }}>
-            <CircularProgress />
+            <CircularProgress sx={{ color: '#82B1FF' }} />
           </Box>
         ) : error ? (
           <Typography color="error">Failed to load dictionary. Ensure backend is running.</Typography>
-        ) : entries?.length === 0 ? (
+        ) : filteredEntries?.length === 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
-            <Typography variant="h6" color="text.secondary">
+            <Typography variant="h6" sx={{ color: '#94A3B8' }}>
               No phonetic rules found. Add one to correct AI pronunciation.
             </Typography>
           </Box>
         ) : (
-          <TableContainer component={Paper} variant="outlined">
+          <TableContainer 
+            component={Paper} 
+            sx={{ 
+              bgcolor: '#212836', 
+              borderRadius: 3, 
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              backgroundImage: 'none'
+            }}
+          >
             <Table sx={{ minWidth: 650 }}>
-              <TableHead sx={{ bgcolor: 'background.default' }}>
-                <TableRow>
-                  <TableCell><strong>Word</strong></TableCell>
-                  <TableCell><strong>Phonetic Replacement</strong></TableCell>
-                  <TableCell><strong>Language</strong></TableCell>
-                  <TableCell><strong>Type</strong></TableCell>
-                  <TableCell align="right"><strong>Actions</strong></TableCell>
+              <TableHead>
+                <TableRow sx={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <TableCell sx={{ color: '#94A3B8', fontWeight: 600, borderBottom: 'none' }}>ORIGINAL</TableCell>
+                  <TableCell sx={{ color: '#94A3B8', fontWeight: 600, borderBottom: 'none' }}>PHONETIC</TableCell>
+                  <TableCell sx={{ color: '#94A3B8', fontWeight: 600, borderBottom: 'none' }}>LANGUAGE</TableCell>
+                  <TableCell align="right" sx={{ color: '#94A3B8', fontWeight: 600, borderBottom: 'none' }}></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {entries?.map((entry) => (
-                  <TableRow key={entry.id} hover>
-                    <TableCell>{entry.word}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{entry.phonetic_replacement}</TableCell>
-                    <TableCell>{entry.language}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {filteredEntries?.map((entry) => (
+                  <TableRow 
+                    key={entry.id} 
+                    hover 
+                    sx={{ 
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02) !important' }
+                    }}
+                  >
+                    <TableCell sx={{ color: '#FFFFFF', fontWeight: 500, borderBottom: 'none' }}>
+                      {entry.word}
+                    </TableCell>
+                    <TableCell sx={{ color: '#FF8A80', fontFamily: 'var(--font-geist-mono)', borderBottom: 'none' }}>
+                      {entry.phonetic_replacement}
+                    </TableCell>
+                    <TableCell sx={{ borderBottom: 'none' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography sx={{ color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {entry.language === 'ru-RU' ? '🇷🇺 Русский' : entry.language === 'ro-RO' ? '🇷🇴 Română' : entry.language === 'en-US' ? '🇺🇸 English' : entry.language}
+                        </Typography>
                         <Chip 
-                          label={entry.entry_type || 'word'} 
+                          label={entry.entry_type ? entry.entry_type.charAt(0).toUpperCase() + entry.entry_type.slice(1) : 'Word'} 
                           size="small" 
-                          color={getTypeColor(entry.entry_type)} 
-                          variant="outlined" 
+                          sx={{ 
+                            bgcolor: 'rgba(255, 255, 255, 0.08)', 
+                            color: '#E2E8F0',
+                            borderRadius: 1,
+                            fontWeight: 500,
+                          }} 
                         />
-                        {/* Placeholder for future audio pronunciation feature */}
-                        <IconButton size="small" color="primary" title="Play Pronunciation (Coming Soon)">
-                          <VolumeUpIcon fontSize="small" />
-                        </IconButton>
                       </Box>
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ borderBottom: 'none', display: 'flex', justifyContent: 'flex-end' }}>
                       <IconButton 
-                        color="error" 
-                        onClick={() => entry.id && deleteMutation.mutate(entry.id)}
-                        disabled={deleteMutation.isPending}
+                        size="small" 
+                        sx={{ color: '#94A3B8', mr: 1, '&:hover': { color: '#82B1FF', bgcolor: 'rgba(130, 177, 255, 0.1)' } }} 
+                        onClick={() => {
+                          setEditingEntry(entry);
+                          setModalOpen(true);
+                        }}
+                        title="Edit Entry"
                       >
-                        <DeleteIcon />
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" sx={{ color: '#94A3B8' }} title="Play Pronunciation (Coming Soon)">
+                        <VolumeUpIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -114,7 +197,11 @@ export default function DictionaryPage() {
         )}
       </Container>
 
-      <DictionaryModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <DictionaryModal 
+        open={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        initialData={editingEntry} 
+      />
     </Box>
   );
 }
