@@ -29,19 +29,20 @@ export interface DiscoveredCharacter {
 }
 
 export interface Project {
-  id?: number;
+  id?: string;
   title: string;
+  language_code?: string;
   description?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface Scene {
-  id?: number;
-  project_id: number;
+  id?: string;
+  project_id: string;
   title: string;
   raw_text: string;
-  script_json?: any; // Represents the breakdown of dialogues
+  script_json?: unknown; // Represents the breakdown of dialogues
   status?: "draft" | "processing" | "completed" | "error";
   audio_url?: string;
   created_at?: string;
@@ -59,14 +60,22 @@ export const api = axios.create({
 // Helper services for clean React Query integration
 export const projectService = {
   getProjects: () => api.get<Project[]>('/projects').then(res => res.data),
-  getProject: (id: number) => api.get<Project>(`/projects/${id}`).then(res => res.data),
+  getProject: (id: string) => api.get<Project>(`/projects/${id}`).then(res => res.data),
   createProject: (data: Partial<Project>) => api.post<Project>('/projects', data).then(res => res.data),
-  updateProject: (id: number, data: Partial<Project>) => api.put<Project>(`/projects/${id}`, data).then(res => res.data),
-  deleteProject: (id: number) => api.delete(`/projects/${id}`).then(res => res.data),
+  updateProject: (id: string, data: Partial<Project>) => api.put<Project>(`/projects/${id}`, data).then(res => res.data),
+  deleteProject: (id: string) => api.delete(`/projects/${id}`).then(res => res.data),
   
-  getProjectCharacters: (id: number) => api.get<Character[]>(`/projects/${id}/characters`).then(res => res.data),
-  linkCharacter: (projectId: number, characterId: string) => api.post(`/projects/${projectId}/characters/${characterId}`).then(res => res.data),
-  discoverCharacters: (projectId: number, rawText: string) => api.post<DiscoveredCharacter[]>(`/projects/${projectId}/characters/discover`, { raw_text: rawText }).then(res => res.data),
+  uploadBook: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/projects/${id}/upload-book`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }).then(res => res.data);
+  },
+  
+  getProjectCharacters: (id: string) => api.get<Character[]>(`/projects/${id}/characters`).then(res => res.data),
+  linkCharacter: (projectId: string, characterId: string) => api.post(`/projects/${projectId}/characters/${characterId}`).then(res => res.data),
+  discoverCharacters: (projectId: string, rawText: string) => api.post<DiscoveredCharacter[]>(`/projects/${projectId}/characters/discover`, { raw_text: rawText }).then(res => res.data),
 };
 
 export const characterService = {
@@ -78,11 +87,11 @@ export const characterService = {
 };
 
 export const sceneService = {
-  getScenes: (projectId: number) => api.get<Scene[]>(`/projects/${projectId}/scenes`).then(res => res.data),
-  getScene: (id: number) => api.get<Scene>(`/scenes/${id}`).then(res => res.data),
-  createScene: (projectId: number, data: Partial<Scene>) => api.post<Scene>(`/projects/${projectId}/scenes`, data).then(res => res.data),
-  updateScene: (id: number, data: Partial<Scene>) => api.put<Scene>(`/scenes/${id}`, data).then(res => res.data),
-  deleteScene: (id: number) => api.delete(`/scenes/${id}`).then(res => res.data),
-  extractScript: (id: number) => api.post(`/scenes/${id}/extract`).then(res => res.data),
-  generateAudio: (id: number) => api.post(`/scenes/${id}/generate-audio`).then(res => res.data),
+  getScenes: (projectId: string) => api.get<Scene[]>(`/projects/${projectId}/scenes`).then(res => res.data),
+  getScene: (id: string) => api.get<Scene>(`/scenes/${id}`).then(res => res.data),
+  createScene: (projectId: string, data: Partial<Scene>) => api.post<Scene>(`/projects/${projectId}/scenes`, data).then(res => res.data),
+  updateScene: (id: string, data: Partial<Scene>) => api.put<Scene>(`/scenes/${id}`, data).then(res => res.data),
+  deleteScene: (id: string) => api.delete(`/scenes/${id}`).then(res => res.data),
+  extractScript: (id: string) => api.post(`/scenes/${id}/extract`).then(res => res.data),
+  generateAudio: (id: string) => api.post(`/scenes/${id}/generate-audio`).then(res => res.data),
 };

@@ -1,66 +1,123 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import React, { useState } from 'react';
+import { 
+  Box, Typography, Button, Card, CardContent, Grid2, CircularProgress, 
+  Container, AppBar, Toolbar 
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { useQuery } from '@tanstack/react-query';
+import { projectService } from '@/lib/api';
+import UploadBookModal from '@/components/modals/UploadBookModal';
+import ManualProjectModal from '@/components/modals/ManualProjectModal';
+
+export default function ProjectsPage() {
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+
+  const { data: projects, isLoading, error } = useQuery({
+    queryKey: ['projects'],
+    queryFn: projectService.getProjects,
+  });
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+    <Box sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+            Audiobook Projects
+          </Typography>
+          {projects && projects.length > 0 && (
+            <Button 
+              variant="contained" 
+              startIcon={<CloudUploadIcon />}
+              onClick={() => setUploadOpen(true)}
+              sx={{ mr: 2 }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+              Upload Book
+            </Button>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography color="error">Failed to load projects. Ensure backend is running.</Typography>
+        ) : projects?.length === 0 ? (
+          <Box 
+            display="flex" 
+            flexDirection="column" 
+            alignItems="center" 
+            justifyContent="center" 
+            height="60vh"
+            gap={4}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <Typography variant="h4" color="text.secondary" fontWeight="500">
+              No Projects Yet
+            </Typography>
+            <Typography variant="body1" color="text.secondary" textAlign="center" maxWidth="sm">
+              Start by uploading an entire book (.txt). We&apos;ll automatically break it down into scenes and cast the characters using AI.
+            </Typography>
+            <Box display="flex" gap={2}>
+              <Button 
+                variant="contained" 
+                size="large" 
+                startIcon={<CloudUploadIcon />}
+                onClick={() => setUploadOpen(true)}
+              >
+                Upload New Book
+              </Button>
+              <Button 
+                variant="outlined" 
+                size="large" 
+                startIcon={<AddIcon />}
+                onClick={() => setManualOpen(true)}
+              >
+                New Project
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Grid2 container spacing={3}>
+            {projects?.map((project) => (
+              <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    cursor: 'pointer',
+                    '&:hover': { borderColor: 'primary.main', boxShadow: 2 }
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" gutterBottom fontWeight="600">
+                      {project.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Language: {project.language_code || 'ru-RU'}
+                    </Typography>
+                    {project.description && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        {project.description}
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid2>
+            ))}
+          </Grid2>
+        )}
+      </Container>
+
+      <UploadBookModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
+      <ManualProjectModal open={manualOpen} onClose={() => setManualOpen(false)} />
+    </Box>
   );
 }
