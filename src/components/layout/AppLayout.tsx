@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, Avatar } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, Avatar, Tooltip } from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -72,26 +72,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     }} 
                   />
                 )}
-                <ListItemButton 
-                  component={Link} 
-                  href={item.path}
-                  sx={{
-                    justifyContent: 'center',
-                    borderRadius: 2,
-                    mx: 2,
-                    p: 1.5,
-                    bgcolor: isActive ? 'rgba(130, 177, 255, 0.08)' : 'transparent',
-                    color: isActive ? '#82B1FF' : '#94A3B8',
-                    '&:hover': {
-                      bgcolor: 'rgba(130, 177, 255, 0.12)',
-                      color: '#82B1FF',
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 'auto', color: 'inherit' }}>
-                    {item.icon}
-                  </ListItemIcon>
-                </ListItemButton>
+                <Tooltip title={item.text} placement="right" arrow>
+                  <ListItemButton 
+                    component={Link} 
+                    href={item.path}
+                    sx={{
+                      justifyContent: 'center',
+                      borderRadius: 2,
+                      mx: 2,
+                      p: 1.5,
+                      bgcolor: isActive ? 'rgba(130, 177, 255, 0.08)' : 'transparent',
+                      color: isActive ? '#82B1FF' : '#94A3B8',
+                      '&:hover': {
+                        bgcolor: 'rgba(130, 177, 255, 0.12)',
+                        color: '#82B1FF',
+                      }
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 'auto', color: 'inherit' }}>
+                      {item.icon}
+                    </ListItemIcon>
+                  </ListItemButton>
+                </Tooltip>
               </ListItem>
             );
           })}
