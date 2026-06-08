@@ -4,7 +4,7 @@ import React from 'react';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, Avatar } from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
-import TranslateIcon from '@mui/icons-material/Translate';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import HeadphonesIcon from '@mui/icons-material/Headphones';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -17,7 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const menuItems = [
     { text: 'Projects', icon: <LibraryBooksIcon />, path: '/' },
     { text: 'Voices', icon: <RecordVoiceOverIcon />, path: '/voices' },
-    { text: 'Dictionary', icon: <TranslateIcon />, path: '/dictionary' },
+    { text: 'Dictionary', icon: <MenuBookIcon />, path: '/dictionary' },
   ];
 
   return (
