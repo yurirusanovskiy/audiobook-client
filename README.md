@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Audiobook TTS Generator (Client)
 
-## Getting Started
+This is the frontend application for the **Audiobook TTS Generator**. It provides a rich, modern, and highly interactive user interface to manage audiobook projects, characters, scenes, and to orchestrate multi-speaker TTS (Text-to-Speech) generation using the Gemini API.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Project Management**: Create and organize audiobook projects.
+- **Voice Casting (Characters)**: Define characters with unique vocal traits, including gender, age, base voice style (e.g., raspy, soft-spoken), and language accents.
+- **Voice Auditioning**: Generate and listen to short voice samples for your characters directly in the browser.
+- **Scene Editor**: A sophisticated editor for writing and importing dialogue. Each line can be assigned to a specific character with line-specific emotional prompts (e.g., *whispering*, *shouting*, *hesitant*).
+- **Phonetic Dictionary (WIP)**: A tool to enforce correct pronunciation and stress marks for specific words across all your projects.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **UI Library**: [React](https://reactjs.org/)
+- **Styling & Components**: [Material UI (MUI v5)](https://mui.com/)
+- **Data Fetching & State**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Getting Started
 
-## Learn More
+### Prerequisites
+- Node.js (v18+)
+- `pnpm` package manager
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Install dependencies:
+   ```bash
+   pnpm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Run the development server:
+   ```bash
+   pnpm run dev
+   ```
 
-## Deploy on Vercel
+3. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> **Note:** The frontend expects the backend server to be running locally on `http://localhost:8000`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 License
+
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute it for both personal and commercial purposes. 
+
+*Please note that this application relies on third-party services and models (such as the Google Gemini API) which are subject to their own respective terms of service.*
