@@ -39,15 +39,24 @@ export interface Project {
   completed_scenes?: number;
 }
 
+export interface LineAudioTake {
+  id: number;
+  audio_url: string;
+  take_number: number;
+  created_at: string;
+}
+
 export interface SceneLine {
   id?: number;
   scene_id?: string;
   character_id?: string | null;
   text: string;
+  phonetic_text?: string | null;
   prompt_override?: string;
   language_override?: string;
   is_manual_phonetics?: boolean;
   audio_url?: string;
+  audio_takes?: LineAudioTake[];
 }
 
 export interface Scene {
