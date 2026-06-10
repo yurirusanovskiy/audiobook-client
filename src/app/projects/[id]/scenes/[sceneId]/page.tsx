@@ -66,9 +66,15 @@ const LineEditor = ({
     }
   });
 
+
+  const queryClient = useQueryClient();
+
   const generateLineAudioMutation = useMutation({
     mutationFn: () => sceneService.generateLineAudio(sceneId, line.id as number),
     onSuccess: (data) => {
+      // The backend may have updated multiple lines in this chunk.
+      // Invalidate the entire scene to fetch updated audio URLs.
+      queryClient.invalidateQueries({ queryKey: ['scene', sceneId] });
       onChange(idx, 'audio_url', data.audio_url);
       onChange(idx, 'audio_takes', data.audio_takes);
     },
@@ -285,7 +291,10 @@ const LineEditor = ({
                   <FormControl size="small" sx={{ minWidth: 120 }}>
                     <Select
                       value={line.audio_url}
-                      onChange={(e) => onChange(idx, 'audio_url', e.target.value)}
+                      onChange={(e) => {
+                        onChange(idx, 'audio_url', e.target.value);
+                        setTimeout(() => onSave(), 100);
+                      }}
                       sx={{ 
                         bgcolor: 'rgba(255,255,255,0.03)',
                         color: '#FFF',
@@ -602,6 +611,24 @@ export default function SceneEditorPage() {
         >
           {generateAudioMutation.isPending ? 'Generating...' : (scene.audio_url ? 'Regenerate Scene' : 'Generate Audio')}
         </Button>
+        
+        {scene.audio_url && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => window.open(`http://127.0.0.1:8000/api/v1/scenes/${sceneId}/download-stems`, '_blank')}
+            sx={{ 
+              bgcolor: '#4CAF50',
+              color: '#fff',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 2,
+              '&:hover': { bgcolor: '#45a049' }
+            }}
+          >
+            Download Stems (ZIP)
+          </Button>
+        )}
       </Box>
     </Box>
   );

@@ -20,6 +20,7 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
   const [gender, setGender] = useState<Character['gender']>('male');
   const [ageCategory, setAgeCategory] = useState<Character['age_category']>('adult');
   const [promptStyle, setPromptStyle] = useState('');
+  const [pitchOverride, setPitchOverride] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -34,6 +35,7 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
         gender,
         age_category: ageCategory,
         prompt_style: promptStyle,
+        pitch_override: pitchOverride,
       };
       
       return await characterService.createCharacter(newChar);
@@ -54,6 +56,7 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
     setGender('male');
     setAgeCategory('adult');
     setPromptStyle('');
+    setPitchOverride('');
     mutation.reset();
     onClose();
   };
@@ -165,6 +168,24 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
               <MenuItem value="elderly">Elderly</MenuItem>
             </TextField>
           </Box>
+
+          <TextField
+            select
+            label="Pitch Override (Optional)"
+            fullWidth
+            value={pitchOverride}
+            onChange={(e) => setPitchOverride(e.target.value)}
+            disabled={mutation.isPending}
+            sx={textFieldStyles}
+          >
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="Very High">Very High</MenuItem>
+            <MenuItem value="High">High</MenuItem>
+            <MenuItem value="Low">Low</MenuItem>
+            <MenuItem value="Deep">Deep</MenuItem>
+            <MenuItem value="Squeaky">Squeaky</MenuItem>
+            <MenuItem value="Raspy">Raspy</MenuItem>
+          </TextField>
 
           <TextField
             label="Default Prompt Style (Optional)"

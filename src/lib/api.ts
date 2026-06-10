@@ -13,6 +13,7 @@ export interface Character {
   name: string;
   voice_id: string;
   prompt_style?: string;
+  pitch_override?: string;
   gender?: "male" | "female";
   age_category?: "child" | "young" | "adult" | "elderly";
   language_profiles?: LanguageProfile[];
