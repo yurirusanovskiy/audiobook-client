@@ -109,8 +109,8 @@ export default function DictionaryModal({ open, onClose, initialData }: Dictiona
         pt: 3,
         px: 3
       }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
-          {isEditing ? "Edit Dictionary Entry" : "Add Dictionary Entry"}
+        <Typography variant="h5" component="div" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
+          {initialData ? "Edit Phonetic Rule" : "Add Phonetic Rule"}
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
           <CloseIcon />

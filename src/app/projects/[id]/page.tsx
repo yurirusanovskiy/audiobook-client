@@ -3,20 +3,34 @@
 import React, { useState } from 'react';
 import { 
   Box, Typography, CircularProgress, 
-  List, ListItem, ListItemButton, ListItemText,
-  Paper, Divider, Button, AppBar, Toolbar, IconButton
+  Card, CardContent, Button, Grid, IconButton,
+  Container, Chip
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutlined';
+import GroupsIcon from '@mui/icons-material/Groups';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { projectService, sceneService } from '@/lib/api';
+import CastingModal from '@/components/modals/CastingModal';
+import DeleteProjectModal from '@/components/modals/DeleteProjectModal';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   
-  const [selectedSceneId, setSelectedSceneId] = useState<string | null>(null);
+  const [castingOpen, setCastingOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => projectService.deleteProject(id as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      router.push('/');
+    }
+  });
 
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ['project', id],
@@ -30,129 +44,143 @@ export default function ProjectDetailsPage() {
     enabled: !!id,
   });
 
-  const { data: activeScene, isLoading: sceneLoading } = useQuery({
-    queryKey: ['scene', selectedSceneId],
-    queryFn: () => sceneService.getScene(selectedSceneId as string),
-    enabled: !!selectedSceneId,
-  });
-
-  const generateAudioMutation = useMutation({
-    mutationFn: () => sceneService.generateAudio(selectedSceneId as string),
-    onSuccess: (data) => {
-      alert("Audio generated! " + (data.audio_file_url || ''));
-    },
-    onError: (error) => {
-      console.error("Audio generation failed", error);
-      alert("Failed to generate audio.");
-    }
-  });
-
   if (projectLoading || scenesLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: '#82B1FF' }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 100px)' }}>
-      <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Toolbar>
-          <IconButton edge="start" onClick={() => router.push('/')} sx={{ mr: 2 }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: 4 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <IconButton 
+          onClick={() => router.push('/')} 
+          sx={{ mr: 2, color: '#94A3B8', bgcolor: 'rgba(255,255,255,0.05)', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
             {project?.title || 'Project Details'}
           </Typography>
-        </Toolbar>
-      </AppBar>
-
-      <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        {/* Left Sidebar: Scene List */}
-        <Paper 
-          variant="outlined" 
+          <Typography variant="body1" sx={{ color: '#94A3B8' }}>
+            {project?.language_code === 'ru-RU' ? 'Русский' : project?.language_code} • {scenes?.length || 0} Scenes
+          </Typography>
+        </Box>
+        <Button 
+          variant="contained" 
+          startIcon={<GroupsIcon />}
+          onClick={() => setCastingOpen(true)}
           sx={{ 
-            width: 300, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            borderRadius: 0,
-            borderTop: 0,
-            borderBottom: 0,
-            borderLeft: 0,
+            bgcolor: '#82B1FF', 
+            color: '#0B1121',
+            px: 3,
+            py: 1.5,
+            mr: 2,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            '&:hover': {
+              bgcolor: '#AECBFF'
+            }
           }}
         >
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Scenes</Typography>
-          </Box>
-          <List sx={{ flexGrow: 1, overflow: 'auto', p: 0 }}>
-            {scenes?.map((scene) => (
-              <React.Fragment key={scene.id}>
-                <ListItem disablePadding>
-                  <ListItemButton 
-                    selected={selectedSceneId === scene.id}
-                    onClick={() => setSelectedSceneId(scene.id as string)}
-                  >
-                    <ListItemText 
-                      primary={<Typography sx={{ fontWeight: selectedSceneId === scene.id ? 'bold' : 'normal' }}>{scene.title}</Typography>} 
-                      secondary={scene.status} 
-                    />
-                  </ListItemButton>
-                </ListItem>
-                <Divider />
-              </React.Fragment>
-            ))}
-            {scenes?.length === 0 && (
-              <Box sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">No scenes generated yet.</Typography>
-              </Box>
-            )}
-          </List>
-        </Paper>
-
-        {/* Right Area: Scene Editor */}
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3, overflow: 'auto' }}>
-          {!selectedSceneId ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <Typography variant="h6" color="text.secondary">Select a scene to edit or view</Typography>
-            </Box>
-          ) : sceneLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <CircularProgress />
-            </Box>
-          ) : activeScene ? (
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{activeScene.title}</Typography>
-                <Button 
-                  variant="contained" 
-                  color="secondary" 
-                  startIcon={<PlayCircleOutlineIcon />}
-                  onClick={() => generateAudioMutation.mutate()}
-                  disabled={generateAudioMutation.isPending}
-                >
-                  Generate Audio
-                </Button>
-              </Box>
-
-              <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {activeScene.raw_text}
-                </Typography>
-              </Paper>
-              
-              {activeScene.audio_url && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>Scene Audio:</Typography>
-                  <audio controls src={activeScene.audio_url} style={{ width: '100%' }} />
-                </Box>
-              )}
-            </Box>
-          ) : (
-            <Typography color="error">Failed to load scene.</Typography>
-          )}
-        </Box>
+          Characters / Casting
+        </Button>
+        <Button 
+          variant="outlined" 
+          color="error"
+          onClick={() => setDeleteOpen(true)}
+          sx={{ 
+            px: 2,
+            py: 1.5,
+            borderRadius: 2,
+            minWidth: 'auto'
+          }}
+        >
+          <DeleteOutlinedIcon />
+        </Button>
       </Box>
+
+      <Container maxWidth="xl" sx={{ px: '0 !important' }}>
+        <Grid container spacing={3}>
+          {scenes?.map((scene) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={scene.id}>
+              <Card sx={{ 
+                bgcolor: '#212836', 
+                borderRadius: 3,
+                border: '1px solid rgba(255,255,255,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                minHeight: 200
+              }}>
+                <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                  <Typography variant="h6" sx={{ color: '#FFFFFF', fontWeight: 600, mb: 1 }}>
+                    {scene.title}
+                  </Typography>
+                  <Chip 
+                    label={scene.status === 'draft' ? 'Draft' : scene.status === 'extracted' ? 'Script Extracted' : 'Completed'} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: scene.status === 'completed' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255,255,255,0.05)', 
+                      color: scene.status === 'completed' ? '#4CAF50' : '#94A3B8',
+                      borderRadius: 1,
+                      fontWeight: 500,
+                      mb: 2
+                    }} 
+                  />
+                  <Typography variant="body2" sx={{ color: '#94A3B8', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {scene.raw_text?.substring(0, 150)}...
+                  </Typography>
+                </CardContent>
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Button 
+                    fullWidth 
+                    variant="outlined" 
+                    startIcon={<EditNoteIcon />}
+                    onClick={() => router.push(`/projects/${id}/scenes/${scene.id}`)}
+                    sx={{ 
+                      borderColor: 'rgba(255,255,255,0.1)',
+                      color: '#FFFFFF',
+                      py: 1,
+                      '&:hover': {
+                        borderColor: '#82B1FF',
+                        bgcolor: 'rgba(130, 177, 255, 0.05)'
+                      }
+                    }}
+                  >
+                    Open Editor
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+          {scenes?.length === 0 && (
+            <Grid size={{ xs: 12 }}>
+              <Box sx={{ textAlign: 'center', py: 10 }}>
+                <Typography variant="h6" color="#94A3B8">No scenes generated yet.</Typography>
+              </Box>
+            </Grid>
+          )}
+        </Grid>
+      </Container>
+
+      {/* Casting Modal Component */}
+      {project && <CastingModal open={castingOpen} onClose={() => setCastingOpen(false)} projectId={project.id!} scenes={scenes || []} />}
+      
+      {/* Delete Project Modal */}
+      {project && (
+        <DeleteProjectModal 
+          open={deleteOpen} 
+          onClose={() => setDeleteOpen(false)} 
+          onConfirm={() => deleteMutation.mutate()} 
+          projectTitle={project.title} 
+          isDeleting={deleteMutation.isPending} 
+        />
+      )}
     </Box>
   );
 }

@@ -35,15 +35,29 @@ export interface Project {
   description?: string;
   created_at?: string;
   updated_at?: string;
+  total_scenes?: number;
+  completed_scenes?: number;
+}
+
+export interface SceneLine {
+  id?: number;
+  scene_id?: string;
+  character_id?: string | null;
+  text: string;
+  prompt_override?: string;
+  language_override?: string;
+  is_manual_phonetics?: boolean;
+  audio_url?: string;
 }
 
 export interface Scene {
   id?: string;
   project_id: string;
   title: string;
-  raw_text: string;
+  raw_text?: string;
   script_json?: unknown; // Represents the breakdown of dialogues
-  status?: "draft" | "processing" | "completed" | "error";
+  status?: "draft" | "processing" | "extracted" | "completed" | "error";
+  lines?: SceneLine[];
   audio_url?: string;
   created_at?: string;
   updated_at?: string;
@@ -76,6 +90,7 @@ export const projectService = {
   getProjectCharacters: (id: string) => api.get<Character[]>(`/projects/${id}/characters`).then(res => res.data),
   linkCharacter: (projectId: string, characterId: string) => api.post(`/projects/${projectId}/characters/${characterId}`).then(res => res.data),
   discoverCharacters: (projectId: string, rawText: string) => api.post<DiscoveredCharacter[]>(`/projects/${projectId}/characters/discover`, { raw_text: rawText }).then(res => res.data),
+  batchSaveCharacters: (projectId: string, suggestions: DiscoveredCharacter[]) => api.post(`/projects/${projectId}/characters/batch`, { suggestions }).then(res => res.data),
 };
 
 export const characterService = {
@@ -94,6 +109,12 @@ export const sceneService = {
   deleteScene: (id: string) => api.delete(`/scenes/${id}`).then(res => res.data),
   extractScript: (id: string) => api.post(`/scenes/${id}/extract`).then(res => res.data),
   generateAudio: (id: string) => api.post(`/scenes/${id}/generate-audio`).then(res => res.data),
+  generateLineAudio: (sceneId: string, lineId: number) => api.post(`/scenes/${sceneId}/lines/${lineId}/generate-audio`).then(res => res.data),
+};
+
+export const processingService = {
+  preprocessLines: (projectId: string, lines: SceneLine[]) => 
+    api.post(`/processing/preprocess-only`, { project_id: projectId, lines }).then(res => res.data),
 };
 
 export interface DictionaryEntry {

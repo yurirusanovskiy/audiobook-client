@@ -108,7 +108,7 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
         pt: 3,
         px: 3
       }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
+        <Typography variant="h5" component="div" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
           Create / Upload New Book
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
@@ -161,11 +161,11 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
             }}
             disabled={mutation.isPending}
           >
-            {file ? file.name : "Select .txt File"}
+            {file ? file.name : "Select Book File (.txt, .pdf, .epub, .docx)"}
             <input
               type="file"
               hidden
-              accept=".txt"
+              accept=".txt,.pdf,.epub,.docx"
               onChange={handleFileChange}
             />
           </Button>

@@ -106,8 +106,8 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
         pt: 3,
         px: 3
       }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
-          Create New Character
+        <Typography variant="h5" component="div" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
+          Create New Voice
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
           <CloseIcon />

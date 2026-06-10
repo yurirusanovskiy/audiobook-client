@@ -29,7 +29,7 @@ export default function ProjectsPage() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 5 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: '#FFFFFF', mb: 1 }}>
-            Audiobook Projects
+            Audiobook Creating Studio
           </Typography>
           <Typography variant="body1" sx={{ color: '#94A3B8' }}>
             {projects ? projects.length : 0} active productions
@@ -135,12 +135,12 @@ export default function ProjectsPage() {
                       <MoreVertIcon sx={{ color: '#94A3B8', cursor: 'pointer' }} />
                     </Box>
 
-                    {/* Title and Author */}
+                    {/* Title and Date */}
                     <Typography variant="h6" sx={{ color: '#FFFFFF', fontWeight: 600, mb: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {project.title}
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#94A3B8', mb: 2 }}>
-                      {project.description || 'Unknown Author'}
+                      {project.created_at ? `Создано ${new Date(project.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}
                     </Typography>
 
                     <Box sx={{ mb: 'auto' }}>
@@ -156,13 +156,13 @@ export default function ProjectsPage() {
                       />
                     </Box>
 
-                    {/* Stats (Mocked for now since backend doesn't return scenes count directly on projects list) */}
+                    {/* Stats */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3, mb: 1.5 }}>
                       <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        24 scenes
+                        {project.total_scenes || 0} scenes
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        ~12h 40m
+                        {/* Dummy duration for now */}
                       </Typography>
                     </Box>
 
@@ -171,7 +171,7 @@ export default function ProjectsPage() {
                       <Box sx={{ width: '100%', mr: 1 }}>
                         <LinearProgress 
                           variant="determinate" 
-                          value={65} 
+                          value={project.total_scenes ? Math.round((project.completed_scenes || 0) / project.total_scenes * 100) : 0} 
                           sx={{ 
                             height: 6, 
                             borderRadius: 3,
@@ -183,7 +183,7 @@ export default function ProjectsPage() {
                         />
                       </Box>
                       <Typography variant="caption" sx={{ color: '#82B1FF', fontWeight: 600 }}>
-                        65%
+                        {project.total_scenes ? Math.round((project.completed_scenes || 0) / project.total_scenes * 100) : 0}%
                       </Typography>
                     </Box>
                   </CardContent>
