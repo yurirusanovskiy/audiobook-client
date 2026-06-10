@@ -4,8 +4,10 @@ import axios from 'axios';
 
 export interface LanguageProfile {
   id?: number;
-  language: string;
-  elevenlabs_voice_id: string;
+  character_id?: string;
+  language_code: string;
+  is_native?: boolean;
+  accent_description?: string;
 }
 
 export interface Character {
@@ -16,6 +18,7 @@ export interface Character {
   pitch_override?: string;
   gender?: "male" | "female";
   age_category?: "child" | "young" | "adult" | "elderly";
+  sample_audio_url?: string;
   language_profiles?: LanguageProfile[];
 }
 
@@ -109,6 +112,11 @@ export const characterService = {
   createCharacter: (data: Character) => api.post<Character>('/characters', data).then(res => res.data),
   updateCharacter: (id: string, data: Partial<Character>) => api.put<Character>(`/characters/${id}`, data).then(res => res.data),
   deleteCharacter: (id: string) => api.delete(`/characters/${id}`).then(res => res.data),
+  
+  createLanguageProfile: (characterId: string, data: LanguageProfile) => api.post<LanguageProfile>(`/characters/${characterId}/language-profiles/`, data).then(res => res.data),
+  updateLanguageProfile: (characterId: string, profileId: number, data: Partial<LanguageProfile>) => api.put<LanguageProfile>(`/characters/${characterId}/language-profiles/${profileId}`, data).then(res => res.data),
+  deleteLanguageProfile: (characterId: string, profileId: number) => api.delete(`/characters/${characterId}/language-profiles/${profileId}`).then(res => res.data),
+  generateSample: (characterId: string) => api.post<Character>(`/characters/${characterId}/generate-sample`).then(res => res.data),
 };
 
 export const sceneService = {

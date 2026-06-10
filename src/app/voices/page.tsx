@@ -6,19 +6,43 @@ import {
   Container, TextField, InputAdornment, IconButton, Chip 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import PersonIcon from '@mui/icons-material/Person';
 import { useQuery } from '@tanstack/react-query';
-import { characterService } from '@/lib/api';
+import { characterService, Character } from '@/lib/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import VoiceModal from '@/components/modals/VoiceModal';
 
 export default function VoicesPage() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [characterToEdit, setCharacterToEdit] = useState<Character | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [playingId, setPlayingId] = useState<string | null>(null);
+
+  
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: characterService.deleteCharacter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['characters'] });
+    }
+  });
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this character?')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleEdit = (char: Character) => {
+    setCharacterToEdit(char);
+    setModalOpen(true);
+  };
 
   const { data: characters, isLoading, error } = useQuery({
     queryKey: ['characters'],
@@ -30,9 +54,13 @@ export default function VoicesPage() {
     c.voice_id.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handlePlaySample = (charId: string) => {
+  const handlePlaySample = (charId: string, sampleUrl?: string) => {
+    if (!sampleUrl) return;
     setPlayingId(charId);
-    setTimeout(() => setPlayingId(null), 2000); // Simulate end of audio after 2s
+    const audio = new Audio(`http://localhost:8000${sampleUrl}`);
+    audio.play();
+    audio.onended = () => setPlayingId(null);
+    audio.onerror = () => setPlayingId(null);
   };
 
   return (
@@ -50,7 +78,7 @@ export default function VoicesPage() {
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
-          onClick={() => setModalOpen(true)}
+          onClick={() => { setCharacterToEdit(null); setModalOpen(true); }}
           sx={{ 
             bgcolor: '#82B1FF', 
             color: '#0B1121',
@@ -118,7 +146,7 @@ export default function VoicesPage() {
         ) : (
           <Grid container spacing={3}>
             {filteredCharacters.map((char) => {
-              const hasAudioSample = true;
+              const hasAudioSample = !!char.sample_audio_url;
               const isPlaying = playingId === char.id;
 
               return (
@@ -156,17 +184,29 @@ export default function VoicesPage() {
                             </Typography>
                           </Box>
                         </Box>
-                        <IconButton 
-                          sx={{ 
-                            color: isPlaying ? '#82B1FF' : '#94A3B8',
-                            bgcolor: isPlaying ? 'rgba(130, 177, 255, 0.1)' : 'transparent',
-                          }}
-                          disabled={!hasAudioSample}
-                          onClick={() => handlePlaySample(char.id)}
-                          title="Play Sample"
-                        >
-                          {hasAudioSample ? <VolumeUpIcon /> : <VolumeOffIcon />}
-                        </IconButton>
+                        
+                        <Box sx={{ display: 'flex' }}>
+                          <IconButton size="small" onClick={() => handleEdit(char)} sx={{ color: '#94A3B8', '&:hover': { color: '#82B1FF' } }}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDelete(char.id)} sx={{ color: '#94A3B8', '&:hover': { color: '#EF4444' } }}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton 
+                            sx={{ 
+                              color: isPlaying ? '#82B1FF' : '#94A3B8',
+                              bgcolor: isPlaying ? 'rgba(130, 177, 255, 0.1)' : 'transparent',
+                              ml: 1
+                            }}
+                            disabled={!hasAudioSample}
+                            onClick={() => handlePlaySample(char.id, char.sample_audio_url)}
+                            title="Play Sample"
+                            size="small"
+                          >
+                            {hasAudioSample ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
+                          </IconButton>
+                        </Box>
+
                       </Box>
                       
                       <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', mt: 1 }}>
@@ -214,7 +254,7 @@ export default function VoicesPage() {
         )}
       </Container>
 
-      <VoiceModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <VoiceModal open={modalOpen} onClose={() => { setModalOpen(false); setCharacterToEdit(null); }} characterToEdit={characterToEdit} />
     </Box>
   );
 }

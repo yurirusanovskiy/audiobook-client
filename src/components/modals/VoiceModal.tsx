@@ -1,35 +1,71 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, MenuItem, CircularProgress, Box, IconButton, Typography
+  Button, TextField, MenuItem, CircularProgress, Box, IconButton, Typography,
+  Divider, Switch, FormControlLabel, List, ListItem, ListItemText, ListItemSecondaryAction, Paper, Autocomplete, Chip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { characterService, Character } from '@/lib/api';
+import { characterService, Character, LanguageProfile } from '@/lib/api';
 
 interface VoiceModalProps {
   open: boolean;
   onClose: () => void;
+  characterToEdit?: Character | null;
 }
 
-export default function VoiceModal({ open, onClose }: VoiceModalProps) {
+export default function VoiceModal({ open, onClose, characterToEdit }: VoiceModalProps) {
+  const isEditMode = !!characterToEdit;
+  
   const [name, setName] = useState('');
   const [voiceId, setVoiceId] = useState('');
   const [gender, setGender] = useState<Character['gender']>('male');
   const [ageCategory, setAgeCategory] = useState<Character['age_category']>('adult');
   const [promptStyle, setPromptStyle] = useState('');
   const [pitchOverride, setPitchOverride] = useState('');
+  
+  const promptStyleArray = React.useMemo(() => 
+    promptStyle ? promptStyle.split(',').map(s => s.trim()).filter(Boolean) : [], 
+  [promptStyle]);
+  
+  // Language Profile States
+  const [newLangCode, setNewLangCode] = useState('');
+  const [newLangIsNative, setNewLangIsNative] = useState(true);
+  const [newLangAccent, setNewLangAccent] = useState('');
 
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  useEffect(() => {
+    if (open) {
+      if (characterToEdit) {
+        setName(characterToEdit.name || '');
+        setVoiceId(characterToEdit.voice_id || '');
+        setGender(characterToEdit.gender || 'male');
+        setAgeCategory(characterToEdit.age_category || 'adult');
+        setPromptStyle(characterToEdit.prompt_style || '');
+        setPitchOverride(characterToEdit.pitch_override || '');
+      } else {
+        setName('');
+        setVoiceId('');
+        setGender('male');
+        setAgeCategory('adult');
+        setPromptStyle('');
+        setPitchOverride('');
+      }
+      setNewLangCode('');
+      setNewLangIsNative(true);
+      setNewLangAccent('');
+    }
+  }, [open, characterToEdit]);
+
+  const saveMutation = useMutation({
     mutationFn: async () => {
       if (!name || !voiceId) throw new Error("Name and Voice ID are required");
       
-      const newChar: Character = {
-        id: `char_${Date.now()}`,
+      const charData: Partial<Character> = {
         name,
         voice_id: voiceId,
         gender,
@@ -38,57 +74,80 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
         pitch_override: pitchOverride,
       };
       
-      return await characterService.createCharacter(newChar);
+      if (isEditMode) {
+        return await characterService.updateCharacter(characterToEdit.id, charData);
+      } else {
+        const newChar: Character = {
+          id: `char_${Date.now()}`,
+          ...charData,
+        } as Character;
+        return await characterService.createCharacter(newChar);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['characters'] });
-      handleClose();
+      onClose();
     },
     onError: (error) => {
-      console.error("Failed to create voice", error);
-      alert("Failed to create voice. Please try again.");
+      console.error("Failed to save voice", error);
+      alert("Failed to save voice. Please try again.");
     }
   });
 
-  const handleClose = () => {
-    setName('');
-    setVoiceId('');
-    setGender('male');
-    setAgeCategory('adult');
-    setPromptStyle('');
-    setPitchOverride('');
-    mutation.reset();
-    onClose();
-  };
+  const addProfileMutation = useMutation({
+    mutationFn: async () => {
+      if (!characterToEdit) return;
+      return await characterService.createLanguageProfile(characterToEdit.id, {
+        language_code: newLangCode,
+        is_native: newLangIsNative,
+        accent_description: newLangAccent
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['characters'] });
+      setNewLangCode('');
+      setNewLangAccent('');
+    }
+  });
+
+  const deleteProfileMutation = useMutation({
+    mutationFn: async (profileId: number) => {
+      if (!characterToEdit) return;
+      return await characterService.deleteLanguageProfile(characterToEdit.id, profileId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['characters'] });
+    }
+  });
+
+  const generateSampleMutation = useMutation({
+    mutationFn: async () => {
+      if (!characterToEdit) return;
+      return await characterService.generateSample(characterToEdit.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['characters'] });
+    }
+  });
 
   const textFieldStyles = {
     '& .MuiOutlinedInput-root': {
       bgcolor: 'rgba(255,255,255,0.03)',
       borderRadius: 2,
       color: '#FFFFFF',
-      '& fieldset': {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-      },
-      '&:hover fieldset': {
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: '#82B1FF',
-      },
+      '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.1)' },
+      '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+      '&.Mui-focused fieldset': { borderColor: '#82B1FF' },
     },
-    '& .MuiInputLabel-root': {
-      color: '#94A3B8',
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: '#82B1FF',
-    }
+    '& .MuiInputLabel-root': { color: '#94A3B8' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#82B1FF' }
   };
 
   return (
     <Dialog 
       open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+      onClose={onClose} 
+      maxWidth="md" 
       fullWidth
       slotProps={{
         paper: {
@@ -101,67 +160,38 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
         }
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        pb: 1,
-        pt: 3,
-        px: 3
-      }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1, pt: 3, px: 3 }}>
         <Typography variant="h5" component="div" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
-          Create New Voice
+          {isEditMode ? 'Edit Voice Profile' : 'Create New Voice'}
         </Typography>
-        <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
+        <IconButton onClick={onClose} sx={{ color: '#94A3B8' }}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ px: 3 }}>
+      <DialogContent sx={{ px: 3, pb: 4 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-          <TextField
-            label="Character Name"
-            fullWidth
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={mutation.isPending}
-            required
-            sx={textFieldStyles}
-          />
-          
-          <TextField
-            label="ElevenLabs Voice ID (or Custom ID)"
-            fullWidth
-            value={voiceId}
-            onChange={(e) => setVoiceId(e.target.value)}
-            disabled={mutation.isPending}
-            required
-            sx={textFieldStyles}
-          />
+          {/* Base Info */}
+          <Typography variant="subtitle1" sx={{ color: '#E2E8F0', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 1 }}>
+            Core Settings
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Character Name" fullWidth value={name} onChange={(e) => setName(e.target.value)} required sx={textFieldStyles} />
+            <TextField select label="Gemini Voice ID" fullWidth value={voiceId} onChange={(e) => setVoiceId(e.target.value)} required sx={textFieldStyles}>
+              <MenuItem value="Puck">Puck</MenuItem>
+              <MenuItem value="Aoede">Aoede</MenuItem>
+              <MenuItem value="Charon">Charon</MenuItem>
+              <MenuItem value="Fenrir">Fenrir</MenuItem>
+              <MenuItem value="Kore">Kore</MenuItem>
+            </TextField>
+          </Box>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
-              select
-              label="Gender"
-              fullWidth
-              value={gender}
-              onChange={(e) => setGender(e.target.value as Character['gender'])}
-              disabled={mutation.isPending}
-              sx={textFieldStyles}
-            >
+            <TextField select label="Gender" fullWidth value={gender} onChange={(e) => setGender(e.target.value as Character['gender'])} sx={textFieldStyles}>
               <MenuItem value="male">Male</MenuItem>
               <MenuItem value="female">Female</MenuItem>
             </TextField>
-
-            <TextField
-              select
-              label="Age Category"
-              fullWidth
-              value={ageCategory}
-              onChange={(e) => setAgeCategory(e.target.value as Character['age_category'])}
-              disabled={mutation.isPending}
-              sx={textFieldStyles}
-            >
+            <TextField select label="Age Category" fullWidth value={ageCategory} onChange={(e) => setAgeCategory(e.target.value as Character['age_category'])} sx={textFieldStyles}>
               <MenuItem value="child">Child</MenuItem>
               <MenuItem value="young">Young</MenuItem>
               <MenuItem value="adult">Adult</MenuItem>
@@ -169,14 +199,20 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
             </TextField>
           </Box>
 
+          {/* Voice Prompt Engineering */}
+          <Typography variant="subtitle1" sx={{ color: '#E2E8F0', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 1, mt: 1 }}>
+            Voice Instructions (Prompt Engineering)
+          </Typography>
+          
           <TextField
             select
             label="Pitch Override (Optional)"
             fullWidth
             value={pitchOverride}
             onChange={(e) => setPitchOverride(e.target.value)}
-            disabled={mutation.isPending}
             sx={textFieldStyles}
+            helperText="Overrides the base pitch of the generated voice"
+            slotProps={{ formHelperText: { sx: { color: '#64748B' } } }}
           >
             <MenuItem value="">Default</MenuItem>
             <MenuItem value="Very High">Very High</MenuItem>
@@ -187,49 +223,133 @@ export default function VoiceModal({ open, onClose }: VoiceModalProps) {
             <MenuItem value="Raspy">Raspy</MenuItem>
           </TextField>
 
-          <TextField
-            label="Default Prompt Style (Optional)"
-            multiline
-            rows={2}
-            fullWidth
-            value={promptStyle}
-            onChange={(e) => setPromptStyle(e.target.value)}
-            disabled={mutation.isPending}
-            placeholder="e.g. Speak confidently and slowly"
-            sx={textFieldStyles}
+          <Autocomplete
+            multiple
+            freeSolo
+            options={["Raspy", "Hoarse", "Clear", "Breathy", "Nasal", "Muffled", "Gravelly", "Smooth", "Husky", "Smoker's voice", "Whispery", "Loud", "Soft-spoken", "Monotone", "Expressive"]}
+            value={promptStyleArray}
+            onChange={(e, newValue) => {
+              if (Array.isArray(newValue)) {
+                setPromptStyle(newValue.join(', '));
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Base Voice Traits"
+                placeholder="Type or select traits..."
+                sx={textFieldStyles}
+                helperText="Traits to apply to the character globally."
+              />
+            )}
           />
+
+          {/* Language Profiles (Only visible when editing an existing character) */}
+          {isEditMode && (
+            <>
+              <Typography variant="subtitle1" sx={{ color: '#E2E8F0', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 1, mt: 2 }}>
+                Language Profiles & Accents
+              </Typography>
+              
+              {characterToEdit?.language_profiles && characterToEdit.language_profiles.length > 0 ? (
+                <List sx={{ bgcolor: 'rgba(255,255,255,0.02)', borderRadius: 2 }}>
+                  {characterToEdit.language_profiles.map(profile => (
+                    <ListItem key={profile.id} divider sx={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                      <ListItemText 
+                        primary={<Typography sx={{ color: '#E2E8F0' }}>Language: {profile.language_code}</Typography>}
+                        secondary={<Typography variant="body2" sx={{ color: '#94A3B8' }}>{profile.is_native ? "Native Speaker" : `Accent: ${profile.accent_description}`}</Typography>}
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton edge="end" onClick={() => profile.id && deleteProfileMutation.mutate(profile.id)} sx={{ color: '#EF4444' }}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="body2" sx={{ color: '#94A3B8', fontStyle: 'italic' }}>No language profiles added yet.</Typography>
+              )}
+
+              <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.02)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', mt: 1 }}>
+                <Typography variant="subtitle2" sx={{ color: '#E2E8F0', mb: 2 }}>Add New Profile</Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <TextField 
+                    label="Lang Code (e.g. ru-RU)" 
+                    size="small"
+                    value={newLangCode} 
+                    onChange={e => setNewLangCode(e.target.value)} 
+                    sx={{ ...textFieldStyles, width: 150 }} 
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={newLangIsNative} onChange={(e) => setNewLangIsNative(e.target.checked)} sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#82B1FF' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#82B1FF' } }} />}
+                    label={<Typography sx={{ color: '#E2E8F0' }}>Native</Typography>}
+                  />
+                  <TextField 
+                    label="Accent Description" 
+                    size="small"
+                    fullWidth
+                    disabled={newLangIsNative}
+                    value={newLangAccent} 
+                    onChange={e => setNewLangAccent(e.target.value)} 
+                    sx={textFieldStyles} 
+                    placeholder="e.g. Heavy French accent"
+                  />
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => addProfileMutation.mutate()}
+                    disabled={!newLangCode || (!newLangIsNative && !newLangAccent) || addProfileMutation.isPending}
+                    sx={{ color: '#82B1FF', borderColor: '#82B1FF' }}
+                  >
+                    Add
+                  </Button>
+                </Box>
+              </Paper>
+            </>
+          )}
+
+          {/* Voice Sample Preview */}
+          {isEditMode && (
+            <Paper sx={{ p: 2, bgcolor: 'rgba(130,177,255,0.05)', borderRadius: 2, border: '1px solid rgba(130,177,255,0.2)', mt: 1 }}>
+              <Typography variant="subtitle2" sx={{ color: '#E2E8F0', mb: 2 }}>Voice Sample Preview</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                  Click below to generate and listen to a sample of this character's voice.
+                </Typography>
+                {characterToEdit?.sample_audio_url && (
+                  <audio controls src={`http://localhost:8000${characterToEdit.sample_audio_url}`} style={{ width: '100%', borderRadius: '8px' }} />
+                )}
+                <Button 
+                  variant="outlined" 
+                  onClick={() => generateSampleMutation.mutate()}
+                  disabled={generateSampleMutation.isPending}
+                  sx={{ color: '#82B1FF', borderColor: '#82B1FF', alignSelf: 'flex-start' }}
+                >
+                  {generateSampleMutation.isPending ? <CircularProgress size={20} sx={{ color: '#82B1FF', mr: 1 }} /> : null}
+                  {generateSampleMutation.isPending ? "Generating..." : "Generate Voice Sample"}
+                </Button>
+              </Box>
+            </Paper>
+          )}
+
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
-        <Button 
-          onClick={handleClose} 
-          disabled={mutation.isPending}
-          sx={{ color: '#94A3B8', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}
-        >
+        <Button onClick={onClose} disabled={saveMutation.isPending} sx={{ color: '#94A3B8', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
           Cancel
         </Button>
         <Button 
-          onClick={() => mutation.mutate()} 
+          onClick={() => saveMutation.mutate()} 
           variant="contained" 
-          disabled={!name || !voiceId || mutation.isPending}
+          disabled={!name || !voiceId || saveMutation.isPending}
           sx={{ 
-            bgcolor: '#82B1FF', 
-            color: '#0B1121',
-            px: 3,
-            borderRadius: 2,
-            fontWeight: 600,
-            textTransform: 'none',
-            '&:hover': {
-              bgcolor: '#AECBFF'
-            },
-            '&.Mui-disabled': {
-              bgcolor: 'rgba(130, 177, 255, 0.3)',
-              color: 'rgba(11, 17, 33, 0.5)'
-            }
+            bgcolor: '#82B1FF', color: '#0B1121', px: 3, borderRadius: 2, fontWeight: 600, textTransform: 'none',
+            '&:hover': { bgcolor: '#AECBFF' },
+            '&.Mui-disabled': { bgcolor: 'rgba(130, 177, 255, 0.3)', color: 'rgba(11, 17, 33, 0.5)' }
           }}
         >
-          {mutation.isPending ? <CircularProgress size={24} sx={{ color: '#0B1121' }} /> : "Create Character"}
+          {saveMutation.isPending ? <CircularProgress size={24} sx={{ color: '#0B1121' }} /> : "Save Character"}
         </Button>
       </DialogActions>
     </Dialog>
