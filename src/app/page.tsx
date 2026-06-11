@@ -110,7 +110,8 @@ export default function ProjectsPage() {
               <ItemCard
                 title="New Project"
                 onClick={() => setUploadOpen(true)}
-                iconNode={<AddIcon sx={{ color: '#82B1FF', fontSize: 32 }} />}
+                disableIconBackground={true}
+                    iconNode={<AddIcon sx={{ color: '#82B1FF', fontSize: 32 }} />}
                 sx={{
                   bgcolor: 'transparent',
                   border: '2px dashed rgba(130, 177, 255, 0.3)',
@@ -142,6 +143,7 @@ export default function ProjectsPage() {
                 >
                   <ItemCard
                     title={project.title}
+                    disableIconBackground={true}
                     iconNode={
                       <MenuBookOutlinedIcon sx={{ color: '#82B1FF' }} />
                     }

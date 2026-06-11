@@ -17,7 +17,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { projectService, sceneService } from '@/lib/api';
 import DeleteProjectModal from '@/components/modals/DeleteProjectModal';
 import CastingDirectorSection from '@/components/CastingDirectorSection';
-import CastingModal from '@/components/modals/CastingModal';
 import ItemCard from '@/components/cards/ItemCard';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
@@ -28,7 +27,6 @@ export default function ProjectDetailsPage() {
   const queryClient = useQueryClient();
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [castingOpen, setCastingOpen] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: () => projectService.deleteProject(id as string),
@@ -101,26 +99,6 @@ export default function ProjectDetailsPage() {
             • {scenes?.length || 0} Scenes
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<GroupsOutlinedIcon />}
-          onClick={() => setCastingOpen(true)}
-          sx={{
-            bgcolor: '#82B1FF',
-            color: '#0B1121',
-            px: 3,
-            py: 1.5,
-            mr: 2,
-            borderRadius: 2,
-            textTransform: 'none',
-            fontWeight: 600,
-            '&:hover': {
-              bgcolor: '#AECBFF',
-            },
-          }}
-        >
-          Voices and Casting
-        </Button>
         <Button
           variant="outlined"
           color="error"
@@ -205,16 +183,6 @@ export default function ProjectDetailsPage() {
           onConfirm={() => deleteMutation.mutate()}
           projectTitle={project.title}
           isDeleting={deleteMutation.isPending}
-        />
-      )}
-
-      {/* Casting Modal Component */}
-      {project && (
-        <CastingModal
-          open={castingOpen}
-          onClose={() => setCastingOpen(false)}
-          projectId={project.id!}
-          scenes={scenes || []}
         />
       )}
     </Box>

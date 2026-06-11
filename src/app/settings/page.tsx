@@ -182,7 +182,7 @@ export default function SettingsPage() {
 
       {/* Add Key Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle as="span">
+        <DialogTitle component="span">
           <Typography variant="h6" sx={{ fontWeight: 600 }}>Add New API Key</Typography>
         </DialogTitle>
         <DialogContent>

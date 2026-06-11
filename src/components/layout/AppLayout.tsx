@@ -11,6 +11,7 @@ import {
   Avatar,
   Tooltip,
 } from '@mui/material';
+import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutlined';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
@@ -29,7 +30,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     { text: 'Voices', icon: <RecordVoiceOverOutlinedIcon />, path: '/voices' },
     {
       text: 'Dictionary',
-      icon: <HistoryEduOutlinedIcon sx={{ fontSize: 28 }} />,
+      icon: <BookOutlinedIcon />,
       path: '/dictionary',
     },
     { text: 'Settings', icon: <SettingsOutlinedIcon />, path: '/settings' },

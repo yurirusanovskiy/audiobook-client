@@ -16,6 +16,7 @@ export interface ItemCardProps {
 
   // Left Avatar/Icon box
   iconNode?: React.ReactNode;
+  disableIconBackground?: boolean;
 
   // Status or Tag Chips
   chips?: { label: string; color?: string; bgcolor?: string }[];
@@ -54,6 +55,7 @@ export default function ItemCard({
   actionButton,
   topRightActions,
   onClick,
+  disableIconBackground,
   sx,
 }: ItemCardProps) {
   return (
@@ -104,8 +106,8 @@ export default function ItemCard({
                 sx={{
                   width: 48,
                   height: 48,
-                  borderRadius: '50%', // Usually 50% for voices, maybe pass as prop? Or let parent pass the full node. We'll pass the node inside the circular box.
-                  bgcolor: 'rgba(130, 177, 255, 0.1)',
+                  borderRadius: disableIconBackground ? 0 : "50%", // Usually 50% for voices, maybe pass as prop? Or let parent pass the full node. We'll pass the node inside the circular box.
+                  bgcolor: disableIconBackground ? "transparent" : "rgba(130, 177, 255, 0.1)",
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
