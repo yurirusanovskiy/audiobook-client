@@ -30,6 +30,9 @@ export default function ManualProjectModal({
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('ru-RU');
   const [description, setDescription] = useState('');
+  const [storagePath, setStoragePath] = useState(
+    '~/Documents/AudioBooks_Outputs',
+  );
 
   const queryClient = useQueryClient();
 
@@ -40,6 +43,7 @@ export default function ManualProjectModal({
       const project = await projectService.createProject({
         title,
         description,
+        storage_path: storagePath || undefined,
         // Backend could support language later
       });
       return project;
@@ -58,6 +62,7 @@ export default function ManualProjectModal({
     setTitle('');
     setLanguage('ru-RU');
     setDescription('');
+    setStoragePath('~/Documents/AudioBooks_Outputs');
     mutation.reset();
     onClose();
   };
@@ -159,6 +164,21 @@ export default function ManualProjectModal({
             onChange={(e) => setDescription(e.target.value)}
             disabled={mutation.isPending}
             sx={textFieldStyles}
+          />
+
+          <TextField
+            label="Audio Storage Path"
+            fullWidth
+            value={storagePath}
+            onChange={(e) => setStoragePath(e.target.value)}
+            disabled={mutation.isPending}
+            helperText="Absolute path or ~/ path where generated audio files will be saved"
+            sx={{
+              ...textFieldStyles,
+              '& .MuiFormHelperText-root': {
+                color: '#64748B',
+              },
+            }}
           />
         </Box>
       </DialogContent>

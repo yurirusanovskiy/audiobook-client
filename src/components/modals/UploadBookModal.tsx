@@ -31,6 +31,9 @@ export default function UploadBookModal({
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('ru-RU');
   const [file, setFile] = useState<File | null>(null);
+  const [storagePath, setStoragePath] = useState(
+    '~/Documents/AudioBooks_Outputs',
+  );
 
   const queryClient = useQueryClient();
 
@@ -40,6 +43,7 @@ export default function UploadBookModal({
 
       const project = await projectService.createProject({
         title,
+        storage_path: storagePath || undefined,
       });
 
       const projectId = project.id;
@@ -62,6 +66,7 @@ export default function UploadBookModal({
     setTitle('');
     setLanguage('ru-RU');
     setFile(null);
+    setStoragePath('~/Documents/AudioBooks_Outputs');
     mutation.reset();
     onClose();
   };
@@ -159,6 +164,21 @@ export default function UploadBookModal({
             <MenuItem value="en-US">🇺🇸 English</MenuItem>
             <MenuItem value="he-IL">🇮🇱 Hebrew</MenuItem>
           </TextField>
+
+          <TextField
+            label="Audio Storage Path"
+            fullWidth
+            value={storagePath}
+            onChange={(e) => setStoragePath(e.target.value)}
+            disabled={mutation.isPending}
+            helperText="Absolute path or ~/ path where generated audio files will be saved"
+            sx={{
+              ...textFieldStyles,
+              '& .MuiFormHelperText-root': {
+                color: '#64748B',
+              },
+            }}
+          />
 
           <Button
             variant="outlined"

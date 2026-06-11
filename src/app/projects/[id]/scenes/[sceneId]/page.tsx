@@ -36,6 +36,7 @@ import {
   projectService,
   processingService,
   SceneLine,
+  getAudioUrl,
 } from '@/lib/api';
 
 // --- Line Editor Sub-Component ---
@@ -331,7 +332,7 @@ const LineEditor = ({
               <>
                 <audio
                   ref={audioRef}
-                  src={`http://127.0.0.1:8000${line.audio_url}`}
+                  src={getAudioUrl(line.audio_url)}
                   onEnded={() => setIsPlaying(false)}
                   style={{ display: 'none' }}
                 />
@@ -502,9 +503,14 @@ export default function SceneEditorPage() {
     onSuccess: (data) => {
       queryClient.setQueryData(['scene', sceneId], data);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Extraction failed', error);
-      alert('Failed to extract script.');
+      const detail = error.response?.data?.detail;
+      if (detail) {
+        alert(detail);
+      } else {
+        alert('Failed to extract script.');
+      }
     },
   });
 
@@ -798,11 +804,7 @@ export default function SceneEditorPage() {
       >
         <audio
           controls
-          src={
-            scene.audio_url
-              ? `http://127.0.0.1:8000${scene.audio_url}`
-              : undefined
-          }
+          src={scene.audio_url ? getAudioUrl(scene.audio_url) : undefined}
           style={{
             flexGrow: 1,
             height: 40,

@@ -36,6 +36,7 @@ export interface Project {
   id?: string;
   title: string;
   language_code?: string;
+  storage_path?: string;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -76,13 +77,23 @@ export interface Scene {
   updated_at?: string;
 }
 
+const BACKEND_URL = 'http://127.0.0.1:8000';
+
 // Axios instance configured to point to our backend API
 export const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/v1',
+  baseURL: `${BACKEND_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+export function getAudioUrl(pathOrUrl: string): string {
+  if (!pathOrUrl) return '';
+  if (pathOrUrl.startsWith('/static/')) {
+    return BACKEND_URL + pathOrUrl;
+  }
+  return `${BACKEND_URL}/api/v1/projects/stream-audio?path=${encodeURIComponent(pathOrUrl)}`;
+}
 
 // Helper services for clean React Query integration
 export const projectService = {

@@ -49,9 +49,14 @@ export default function CastingModal({
     onSuccess: (data) => {
       setDiscoveredCharacters(data);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Failed to discover characters', error);
-      alert('Failed to analyze book for characters.');
+      const detail = error.response?.data?.detail;
+      if (detail) {
+        alert(detail);
+      } else {
+        alert('Failed to analyze book for characters.');
+      }
     },
   });
 

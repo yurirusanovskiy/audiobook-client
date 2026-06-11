@@ -27,7 +27,12 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { characterService, Character, LanguageProfile } from '@/lib/api';
+import {
+  characterService,
+  Character,
+  LanguageProfile,
+  getAudioUrl,
+} from '@/lib/api';
 
 interface VoiceModalProps {
   open: boolean;
@@ -535,7 +540,7 @@ export default function VoiceModal({
                 {characterToEdit?.sample_audio_url && (
                   <audio
                     controls
-                    src={`http://localhost:8000${characterToEdit.sample_audio_url}`}
+                    src={getAudioUrl(characterToEdit.sample_audio_url)}
                     style={{ width: '100%', borderRadius: '8px' }}
                   />
                 )}

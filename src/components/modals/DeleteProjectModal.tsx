@@ -56,7 +56,7 @@ export default function DeleteProjectModal({
         }}
       >
         <WarningAmberIcon color="error" />
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" component="span" sx={{ fontWeight: 600 }}>
           Delete Project
         </Typography>
       </DialogTitle>
