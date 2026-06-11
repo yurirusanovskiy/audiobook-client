@@ -1,12 +1,26 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Box, Typography, CircularProgress, 
-  Paper, Button, AppBar, Toolbar, IconButton,
-  List, ListItem, Divider, Avatar, Container,
-  TextField, Select, MenuItem, FormControl, Tooltip,
-  Chip
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Paper,
+  Button,
+  AppBar,
+  Toolbar,
+  IconButton,
+  List,
+  ListItem,
+  Divider,
+  Avatar,
+  Container,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  Tooltip,
+  Chip,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
@@ -17,23 +31,28 @@ import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { sceneService, projectService, processingService, SceneLine } from '@/lib/api';
+import {
+  sceneService,
+  projectService,
+  processingService,
+  SceneLine,
+} from '@/lib/api';
 
 // --- Line Editor Sub-Component ---
-const LineEditor = ({ 
-  line, 
-  idx, 
-  projectId, 
-  sceneId, 
-  characters, 
-  onChange, 
-  onSave 
-}: { 
-  line: SceneLine; 
-  idx: number; 
-  projectId: string; 
+const LineEditor = ({
+  line,
+  idx,
+  projectId,
+  sceneId,
+  characters,
+  onChange,
+  onSave,
+}: {
+  line: SceneLine;
+  idx: number;
+  projectId: string;
   sceneId: string;
-  characters: any[]; 
+  characters: any[];
   onChange: (index: number, field: keyof SceneLine, value: any) => void;
   onSave: () => void;
 }) => {
@@ -56,21 +75,25 @@ const LineEditor = ({
   const processPhoneticsMutation = useMutation({
     mutationFn: () => processingService.preprocessLines(projectId, [line]),
     onSuccess: (data) => {
-      onChange(idx, 'phonetic_text', data.processed_lines[0]?.processed_text || line.text);
+      onChange(
+        idx,
+        'phonetic_text',
+        data.processed_lines[0]?.processed_text || line.text,
+      );
       onChange(idx, 'is_manual_phonetics', true);
       setTimeout(() => onSave(), 100);
     },
     onError: (error) => {
-      console.error("Phonetics processing failed", error);
-      alert("Failed to process phonetics.");
-    }
+      console.error('Phonetics processing failed', error);
+      alert('Failed to process phonetics.');
+    },
   });
-
 
   const queryClient = useQueryClient();
 
   const generateLineAudioMutation = useMutation({
-    mutationFn: () => sceneService.generateLineAudio(sceneId, line.id as number),
+    mutationFn: () =>
+      sceneService.generateLineAudio(sceneId, line.id as number),
     onSuccess: (data) => {
       // The backend may have updated multiple lines in this chunk.
       // Invalidate the entire scene to fetch updated audio URLs.
@@ -79,9 +102,9 @@ const LineEditor = ({
       onChange(idx, 'audio_takes', data.audio_takes);
     },
     onError: (error) => {
-      console.error("Line audio generation failed", error);
-      alert("Failed to generate audio for this line.");
-    }
+      console.error('Line audio generation failed', error);
+      alert('Failed to generate audio for this line.');
+    },
   });
 
   const handleToggleManualPhonetics = () => {
@@ -94,51 +117,71 @@ const LineEditor = ({
   };
 
   return (
-    <Box sx={{ 
-      bgcolor: '#151A25', 
-      border: '1px solid rgba(255,255,255,0.05)', 
-      borderRadius: 3, 
-      p: 3, 
-      display: 'flex', 
-      flexDirection: 'column', 
-      gap: 2.5 
-    }}>
+    <Box
+      sx={{
+        bgcolor: '#151A25',
+        border: '1px solid rgba(255,255,255,0.05)',
+        borderRadius: 3,
+        p: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2.5,
+      }}
+    >
       {/* Top Row: Character Select & Phonetics Toggle */}
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <FormControl size="small" sx={{ flexGrow: 1 }}>
           <Select
             value={charValue}
             onChange={(e) => {
-              onChange(idx, 'character_id', e.target.value === 'narrator' ? null : e.target.value);
+              onChange(
+                idx,
+                'character_id',
+                e.target.value === 'narrator' ? null : e.target.value,
+              );
               setTimeout(() => onSave(), 100);
             }}
             IconComponent={KeyboardArrowDownIcon}
-            sx={{ 
+            sx={{
               bgcolor: 'rgba(255,255,255,0.03)',
               color: '#FFF',
               fontWeight: 500,
               fontSize: '0.875rem',
               borderRadius: 2,
-              '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.05)' },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.1)' },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' }
+              '.MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.05)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.1)',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.2)',
+              },
             }}
             MenuProps={{
-              slotProps: { paper: { sx: { bgcolor: '#1E293B', color: '#FFF' } } }
+              slotProps: {
+                paper: { sx: { bgcolor: '#1E293B', color: '#FFF' } },
+              },
             }}
           >
-            <MenuItem value="narrator" sx={{ fontWeight: 500 }}>Narrator</MenuItem>
-            {characters.map(c => (
-              <MenuItem key={c.id} value={c.id} sx={{ fontWeight: 500 }}>{c.name}</MenuItem>
+            <MenuItem value="narrator" sx={{ fontWeight: 500 }}>
+              Narrator
+            </MenuItem>
+            {characters.map((c) => (
+              <MenuItem key={c.id} value={c.id} sx={{ fontWeight: 500 }}>
+                {c.name}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        <Button 
+        <Button
           onClick={handleToggleManualPhonetics}
           disabled={processPhoneticsMutation.isPending}
-          sx={{ 
-            bgcolor: line.is_manual_phonetics ? 'rgba(244,143,177,0.15)' : 'rgba(255,255,255,0.03)',
+          sx={{
+            bgcolor: line.is_manual_phonetics
+              ? 'rgba(244,143,177,0.15)'
+              : 'rgba(255,255,255,0.03)',
             color: line.is_manual_phonetics ? '#f48fb1' : '#94A3B8',
             border: `1px solid ${line.is_manual_phonetics ? 'rgba(244,143,177,0.3)' : 'rgba(255,255,255,0.05)'}`,
             fontWeight: 500,
@@ -149,24 +192,32 @@ const LineEditor = ({
             py: 1,
             whiteSpace: 'nowrap',
             '&:hover': {
-              bgcolor: line.is_manual_phonetics ? 'rgba(244,143,177,0.25)' : 'rgba(255,255,255,0.08)',
-            }
+              bgcolor: line.is_manual_phonetics
+                ? 'rgba(244,143,177,0.25)'
+                : 'rgba(255,255,255,0.08)',
+            },
           }}
         >
-          {processPhoneticsMutation.isPending ? <CircularProgress size={16} color="inherit" /> : 'Preprocess Phonetics'}
+          {processPhoneticsMutation.isPending ? (
+            <CircularProgress size={16} color="inherit" />
+          ) : (
+            'Preprocess Phonetics'
+          )}
         </Button>
       </Box>
 
       {/* Text Area (Original or Phonetic based on state) */}
       <Box>
-        <Typography sx={{ 
-          color: '#94A3B8', 
-          fontSize: '0.6875rem', 
-          fontWeight: 600, 
-          textTransform: 'uppercase', 
-          letterSpacing: '0.07em',
-          mb: 1
-        }}>
+        <Typography
+          sx={{
+            color: '#94A3B8',
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            mb: 1,
+          }}
+        >
           Original Text
         </Typography>
         <TextField
@@ -183,8 +234,10 @@ const LineEditor = ({
               lineHeight: 1.6,
               '& fieldset': { borderColor: 'rgba(255,255,255,0.05)' },
               '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-              '&.Mui-focused fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-            }
+              '&.Mui-focused fieldset': {
+                borderColor: 'rgba(255,255,255,0.2)',
+              },
+            },
           }}
         />
       </Box>
@@ -192,14 +245,16 @@ const LineEditor = ({
       {/* Phonetic Text Area (Only visible when active) */}
       {line.is_manual_phonetics && (
         <Box>
-          <Typography sx={{ 
-            color: '#f48fb1', 
-            fontSize: '0.6875rem', 
-            fontWeight: 600, 
-            textTransform: 'uppercase', 
-            letterSpacing: '0.07em',
-            mb: 1
-          }}>
+          <Typography
+            sx={{
+              color: '#f48fb1',
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              mb: 1,
+            }}
+          >
             Phonetic Text (ruaccent)
           </Typography>
           <TextField
@@ -218,7 +273,7 @@ const LineEditor = ({
                 '& fieldset': { borderColor: 'rgba(244,143,177,0.2)' },
                 '&:hover fieldset': { borderColor: 'rgba(244,143,177,0.4)' },
                 '&.Mui-focused fieldset': { borderColor: '#f48fb1' },
-              }
+              },
             }}
           />
         </Box>
@@ -226,14 +281,16 @@ const LineEditor = ({
 
       {/* Prompt Override */}
       <Box>
-        <Typography sx={{ 
-          color: '#94A3B8', 
-          fontSize: '0.6875rem', 
-          fontWeight: 600, 
-          textTransform: 'uppercase', 
-          letterSpacing: '0.07em',
-          mb: 1
-        }}>
+        <Typography
+          sx={{
+            color: '#94A3B8',
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            mb: 1,
+          }}
+        >
           Prompt Override
         </Typography>
         <TextField
@@ -250,42 +307,58 @@ const LineEditor = ({
               borderRadius: 2,
               '& fieldset': { borderColor: 'rgba(255,255,255,0.05)' },
               '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-              '&.Mui-focused fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-            }
+              '&.Mui-focused fieldset': {
+                borderColor: 'rgba(255,255,255,0.2)',
+              },
+            },
           }}
         />
       </Box>
 
       {/* Line Audio Generation/Playback */}
-      <Box sx={{ display: 'flex', gap: 1, mt: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1,
+          mt: 1,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}
+      >
         {line.id && (
           <>
             {line.audio_url ? (
               <>
-                <audio 
-                  ref={audioRef} 
-                  src={`http://127.0.0.1:8000${line.audio_url}`} 
-                  onEnded={() => setIsPlaying(false)} 
-                  style={{ display: 'none' }} 
+                <audio
+                  ref={audioRef}
+                  src={`http://127.0.0.1:8000${line.audio_url}`}
+                  onEnded={() => setIsPlaying(false)}
+                  style={{ display: 'none' }}
                 />
-                <Button 
-                  variant="contained" 
-                  startIcon={isPlaying ? <PauseCircleOutlineIcon /> : <PlayCircleOutlineIcon />}
+                <Button
+                  variant="contained"
+                  startIcon={
+                    isPlaying ? (
+                      <PauseCircleOutlineIcon />
+                    ) : (
+                      <PlayCircleOutlineIcon />
+                    )
+                  }
                   onClick={togglePlay}
                   size="small"
-                  sx={{ 
-                    bgcolor: '#4CAF50', 
+                  sx={{
+                    bgcolor: '#4CAF50',
                     color: '#fff',
                     fontWeight: 600,
                     textTransform: 'none',
                     borderRadius: 2,
                     minWidth: 100,
-                    '&:hover': { bgcolor: '#45a049' }
+                    '&:hover': { bgcolor: '#45a049' },
                   }}
                 >
                   {isPlaying ? 'Pause' : 'Play Preview'}
                 </Button>
-                
+
                 {/* Audio Takes Dropdown */}
                 {line.audio_takes && line.audio_takes.length > 0 && (
                   <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -295,61 +368,89 @@ const LineEditor = ({
                         onChange(idx, 'audio_url', e.target.value);
                         setTimeout(() => onSave(), 100);
                       }}
-                      sx={{ 
+                      sx={{
                         bgcolor: 'rgba(255,255,255,0.03)',
                         color: '#FFF',
                         fontSize: '0.75rem',
                         height: '32px',
                         borderRadius: 2,
-                        '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.05)' }
+                        '.MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(255,255,255,0.05)',
+                        },
                       }}
                       MenuProps={{
-                        slotProps: { paper: { sx: { bgcolor: '#1E293B', color: '#FFF' } } }
+                        slotProps: {
+                          paper: { sx: { bgcolor: '#1E293B', color: '#FFF' } },
+                        },
                       }}
                     >
-                      {line.audio_takes.map(take => (
-                        <MenuItem key={take.id} value={take.audio_url} sx={{ fontSize: '0.75rem' }}>
+                      {line.audio_takes.map((take) => (
+                        <MenuItem
+                          key={take.id}
+                          value={take.audio_url}
+                          sx={{ fontSize: '0.75rem' }}
+                        >
                           Take {take.take_number}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                 )}
-                
-                <Button 
-                  size="small" 
+
+                <Button
+                  size="small"
                   variant="outlined"
-                  onClick={() => generateLineAudioMutation.mutate()} 
-                  disabled={generateLineAudioMutation.isPending} 
-                  startIcon={generateLineAudioMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <ReplayIcon />}
-                  sx={{ 
-                    color: '#94A3B8', 
+                  onClick={() => generateLineAudioMutation.mutate()}
+                  disabled={generateLineAudioMutation.isPending}
+                  startIcon={
+                    generateLineAudioMutation.isPending ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      <ReplayIcon />
+                    )
+                  }
+                  sx={{
+                    color: '#94A3B8',
                     borderColor: 'rgba(255,255,255,0.1)',
                     textTransform: 'none',
                     borderRadius: 2,
-                    '&:hover': { color: '#FFF', borderColor: 'rgba(255,255,255,0.2)' } 
+                    '&:hover': {
+                      color: '#FFF',
+                      borderColor: 'rgba(255,255,255,0.2)',
+                    },
                   }}
                 >
                   Regenerate
                 </Button>
               </>
             ) : (
-              <Button 
-                variant="outlined" 
-                startIcon={generateLineAudioMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <PlayCircleOutlineIcon />}
+              <Button
+                variant="outlined"
+                startIcon={
+                  generateLineAudioMutation.isPending ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <PlayCircleOutlineIcon />
+                  )
+                }
                 onClick={() => generateLineAudioMutation.mutate()}
                 disabled={generateLineAudioMutation.isPending}
                 size="small"
-                sx={{ 
-                  borderColor: 'rgba(255,255,255,0.1)', 
+                sx={{
+                  borderColor: 'rgba(255,255,255,0.1)',
                   color: '#94A3B8',
                   fontWeight: 600,
                   textTransform: 'none',
                   borderRadius: 2,
-                  '&:hover': { borderColor: 'rgba(255,255,255,0.2)', color: '#FFF' }
+                  '&:hover': {
+                    borderColor: 'rgba(255,255,255,0.2)',
+                    color: '#FFF',
+                  },
                 }}
               >
-                {generateLineAudioMutation.isPending ? 'Generating...' : 'Generate audio preview'}
+                {generateLineAudioMutation.isPending
+                  ? 'Generating...'
+                  : 'Generate audio preview'}
               </Button>
             )}
           </>
@@ -359,7 +460,6 @@ const LineEditor = ({
   );
 };
 // --- End Line Editor ---
-
 
 export default function SceneEditorPage() {
   const { id, sceneId } = useParams<{ id: string; sceneId: string }>();
@@ -403,19 +503,20 @@ export default function SceneEditorPage() {
       queryClient.setQueryData(['scene', sceneId], data);
     },
     onError: (error) => {
-      console.error("Extraction failed", error);
-      alert("Failed to extract script.");
-    }
+      console.error('Extraction failed', error);
+      alert('Failed to extract script.');
+    },
   });
 
   const saveSceneMutation = useMutation({
-    mutationFn: (lines: SceneLine[]) => sceneService.updateScene(sceneId as string, { lines }),
+    mutationFn: (lines: SceneLine[]) =>
+      sceneService.updateScene(sceneId as string, { lines }),
     onSuccess: (data) => {
       queryClient.setQueryData(['scene', sceneId], data);
     },
     onError: (error) => {
-      console.error("Save failed", error);
-    }
+      console.error('Save failed', error);
+    },
   });
 
   const generateAudioMutation = useMutation({
@@ -424,13 +525,17 @@ export default function SceneEditorPage() {
       queryClient.setQueryData(['scene', sceneId], data);
     },
     onError: (error) => {
-      console.error("Audio generation failed", error);
-      alert("Failed to generate scene audio.");
-    }
+      console.error('Audio generation failed', error);
+      alert('Failed to generate scene audio.');
+    },
   });
 
-  const handleLineChange = (index: number, field: keyof SceneLine, value: any) => {
-    setEditedLines(prev => {
+  const handleLineChange = (
+    index: number,
+    field: keyof SceneLine,
+    value: any,
+  ) => {
+    setEditedLines((prev) => {
       const newLines = [...prev];
       newLines[index] = { ...newLines[index], [field]: value };
       return newLines;
@@ -443,7 +548,15 @@ export default function SceneEditorPage() {
 
   if (sceneLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: '#0B1121' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          bgcolor: '#0B1121',
+        }}
+      >
         <CircularProgress sx={{ color: '#82B1FF' }} />
       </Box>
     );
@@ -457,24 +570,62 @@ export default function SceneEditorPage() {
     );
   }
 
-  const isExtracted = scene.status === 'extracted' || scene.status === 'completed' || (scene.lines && scene.lines.length > 0);
+  const isExtracted =
+    scene.status === 'extracted' ||
+    scene.status === 'completed' ||
+    (scene.lines && scene.lines.length > 0);
   const characters = projectCharacters || [];
   const wordCount = scene.raw_text ? scene.raw_text.split(/\s+/).length : 0;
   const estimatedMinutes = Math.max(1, Math.round(wordCount / 130));
 
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#0B1121' }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        bgcolor: '#0B1121',
+      }}
+    >
       {/* Topbar */}
-      <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', bgcolor: '#151A25' }}>
+      <AppBar
+        position="static"
+        color="transparent"
+        elevation={0}
+        sx={{
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          bgcolor: '#151A25',
+        }}
+      >
         <Toolbar sx={{ gap: 2, minHeight: '64px !important', px: 3 }}>
-          <IconButton edge="start" onClick={() => router.push(`/projects/${id}`)} sx={{ color: '#94A3B8', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+          <IconButton
+            edge="start"
+            onClick={() => router.push(`/projects/${id}`)}
+            sx={{
+              color: '#94A3B8',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
+            }}
+          >
             <ArrowBackIcon fontSize="small" />
           </IconButton>
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.75rem' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: '#94A3B8', fontSize: '0.75rem' }}
+            >
               {project?.title || 'Loading project...'}
             </Typography>
-            <Typography variant="h6" component="div" sx={{ fontWeight: 600, color: '#FFFFFF', fontSize: '1rem', lineHeight: 1.2 }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                fontWeight: 600,
+                color: '#FFFFFF',
+                fontSize: '1rem',
+                lineHeight: 1.2,
+              }}
+            >
               {scene.title}
             </Typography>
           </Box>
@@ -487,16 +638,40 @@ export default function SceneEditorPage() {
       {/* Main Workspace */}
       <Box sx={{ flexGrow: 1, overflow: 'hidden', display: 'flex' }}>
         {/* Left Pane: Raw Text */}
-        <Box sx={{ width: '42%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography sx={{ color: '#94A3B8', fontSize: '0.8125rem', fontWeight: 500 }}>
+        <Box
+          sx={{
+            width: '42%',
+            display: 'flex',
+            flexDirection: 'column',
+            borderRight: '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <Box
+            sx={{
+              px: 3,
+              py: 2,
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography
+              sx={{ color: '#94A3B8', fontSize: '0.8125rem', fontWeight: 500 }}
+            >
               Raw Text
             </Typography>
-            <Button 
-              startIcon={extractMutation.isPending ? <CircularProgress size={14} color="inherit" /> : <AutoFixHighIcon fontSize="small" />}
+            <Button
+              startIcon={
+                extractMutation.isPending ? (
+                  <CircularProgress size={14} color="inherit" />
+                ) : (
+                  <AutoFixHighIcon fontSize="small" />
+                )
+              }
               onClick={() => extractMutation.mutate()}
               disabled={extractMutation.isPending}
-              sx={{ 
+              sx={{
                 background: 'linear-gradient(135deg, #90caf9 0%, #a5b4fc 100%)',
                 color: '#0f172a',
                 boxShadow: '0 0 16px rgba(144,202,249,0.3)',
@@ -506,55 +681,88 @@ export default function SceneEditorPage() {
                 borderRadius: 2,
                 px: 2,
                 py: 0.5,
-                '&:hover': { opacity: 0.9 }
+                '&:hover': { opacity: 0.9 },
               }}
             >
-              {extractMutation.isPending ? 'Extracting...' : 'Extract Script & Roles'}
+              {extractMutation.isPending
+                ? 'Extracting...'
+                : 'Extract Script & Roles'}
             </Button>
           </Box>
-          <Box sx={{ flexGrow: 1, p: 3, bgcolor: '#0d1929', overflowY: 'auto' }}>
-            <Typography sx={{ 
-              color: '#FFF', 
-              fontFamily: 'monospace', 
-              fontSize: '0.8125rem', 
-              lineHeight: 1.75, 
-              whiteSpace: 'pre-wrap' 
-            }}>
+          <Box
+            sx={{ flexGrow: 1, p: 3, bgcolor: '#0d1929', overflowY: 'auto' }}
+          >
+            <Typography
+              sx={{
+                color: '#FFF',
+                fontFamily: 'monospace',
+                fontSize: '0.8125rem',
+                lineHeight: 1.75,
+                whiteSpace: 'pre-wrap',
+              }}
+            >
               {scene.raw_text}
             </Typography>
           </Box>
         </Box>
 
         {/* Right Pane: Dialogue Editor */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography sx={{ color: '#94A3B8', fontSize: '0.8125rem', fontWeight: 500 }}>
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            sx={{
+              px: 3,
+              py: 2,
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography
+              sx={{ color: '#94A3B8', fontSize: '0.8125rem', fontWeight: 500 }}
+            >
               Scene & Dialogue Editor
             </Typography>
-            <Chip 
-              label={`${editedLines.length} blocks`} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(144,202,249,0.12)', 
-                color: '#90caf9', 
-                fontWeight: 600, 
+            <Chip
+              label={`${editedLines.length} blocks`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(144,202,249,0.12)',
+                color: '#90caf9',
+                fontWeight: 600,
                 fontSize: '0.6875rem',
-                borderRadius: 1
-              }} 
+                borderRadius: 1,
+              }}
             />
           </Box>
-          
+
           <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 3, pb: 15 }}>
             {!isExtracted ? (
-              <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }}>
                   Click "Extract Script & Roles" to generate dialogue blocks
                 </Typography>
               </Box>
             ) : (
-              <List sx={{ p: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <List
+                sx={{ p: 0, display: 'flex', flexDirection: 'column', gap: 2 }}
+              >
                 {editedLines.map((line, idx) => (
-                  <LineEditor 
+                  <LineEditor
                     key={line.id || idx}
                     line={line}
                     idx={idx}
@@ -572,33 +780,51 @@ export default function SceneEditorPage() {
       </Box>
 
       {/* Global Audio Player Bar */}
-      <Box sx={{ 
-        p: 2, 
-        px: 3,
-        borderTop: '1px solid rgba(255,255,255,0.05)', 
-        bgcolor: '#151A25',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 3,
-        position: 'fixed',
-        bottom: 0,
-        left: 88, // Account for sidebar width
-        right: 0,
-        zIndex: 10
-      }}>
-        <audio 
-          controls 
-          src={scene.audio_url ? `http://127.0.0.1:8000${scene.audio_url}` : undefined} 
-          style={{ flexGrow: 1, height: 40, opacity: scene.audio_url ? 1 : 0.4 }}
+      <Box
+        sx={{
+          p: 2,
+          px: 3,
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+          bgcolor: '#151A25',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 3,
+          position: 'fixed',
+          bottom: 0,
+          left: 88, // Account for sidebar width
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+        <audio
+          controls
+          src={
+            scene.audio_url
+              ? `http://127.0.0.1:8000${scene.audio_url}`
+              : undefined
+          }
+          style={{
+            flexGrow: 1,
+            height: 40,
+            opacity: scene.audio_url ? 1 : 0.4,
+          }}
         />
-        
-        <Button 
-          variant={scene.audio_url ? "outlined" : "contained"}
-          color={scene.audio_url ? "primary" : "secondary"}
-          startIcon={generateAudioMutation.isPending ? <CircularProgress size={16} color="inherit" /> : (scene.audio_url ? <ReplayIcon /> : <PlayCircleOutlineIcon />)}
+
+        <Button
+          variant={scene.audio_url ? 'outlined' : 'contained'}
+          color={scene.audio_url ? 'primary' : 'secondary'}
+          startIcon={
+            generateAudioMutation.isPending ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : scene.audio_url ? (
+              <ReplayIcon />
+            ) : (
+              <PlayCircleOutlineIcon />
+            )
+          }
           onClick={() => generateAudioMutation.mutate()}
           disabled={generateAudioMutation.isPending || !isExtracted}
-          sx={{ 
+          sx={{
             bgcolor: scene.audio_url ? 'transparent' : '#82B1FF',
             color: scene.audio_url ? '#82B1FF' : '#0f172a',
             borderColor: scene.audio_url ? '#82B1FF' : 'transparent',
@@ -606,24 +832,35 @@ export default function SceneEditorPage() {
             textTransform: 'none',
             borderRadius: 2,
             minWidth: 160,
-            '&:hover': { bgcolor: scene.audio_url ? 'rgba(130, 177, 255, 0.1)' : '#AECBFF' }
+            '&:hover': {
+              bgcolor: scene.audio_url ? 'rgba(130, 177, 255, 0.1)' : '#AECBFF',
+            },
           }}
         >
-          {generateAudioMutation.isPending ? 'Generating...' : (scene.audio_url ? 'Regenerate Scene' : 'Generate Audio')}
+          {generateAudioMutation.isPending
+            ? 'Generating...'
+            : scene.audio_url
+              ? 'Regenerate Scene'
+              : 'Generate Audio'}
         </Button>
-        
+
         {scene.audio_url && (
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => window.open(`http://127.0.0.1:8000/api/v1/scenes/${sceneId}/download-stems`, '_blank')}
-            sx={{ 
+            onClick={() =>
+              window.open(
+                `http://127.0.0.1:8000/api/v1/scenes/${sceneId}/download-stems`,
+                '_blank',
+              )
+            }
+            sx={{
               bgcolor: '#4CAF50',
               color: '#fff',
               fontWeight: 600,
               textTransform: 'none',
               borderRadius: 2,
-              '&:hover': { bgcolor: '#45a049' }
+              '&:hover': { bgcolor: '#45a049' },
             }}
           >
             Download Stems (ZIP)

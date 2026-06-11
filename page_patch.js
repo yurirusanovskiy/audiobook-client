@@ -4,18 +4,18 @@ let code = fs.readFileSync('src/app/voices/page.tsx', 'utf8');
 
 // Replace VoiceModal imports and states
 code = code.replace(
-  "const [modalOpen, setModalOpen] = useState(false);",
-  "const [modalOpen, setModalOpen] = useState(false);\n  const [characterToEdit, setCharacterToEdit] = useState<Character | null>(null);"
+  'const [modalOpen, setModalOpen] = useState(false);',
+  'const [modalOpen, setModalOpen] = useState(false);\n  const [characterToEdit, setCharacterToEdit] = useState<Character | null>(null);',
 );
 
 code = code.replace(
   "import AddIcon from '@mui/icons-material/Add';",
-  "import AddIcon from '@mui/icons-material/Add';\nimport EditIcon from '@mui/icons-material/Edit';\nimport DeleteIcon from '@mui/icons-material/Delete';"
+  "import AddIcon from '@mui/icons-material/Add';\nimport EditIcon from '@mui/icons-material/Edit';\nimport DeleteIcon from '@mui/icons-material/Delete';",
 );
 
 code = code.replace(
   "import { characterService } from '@/lib/api';",
-  "import { characterService, Character } from '@/lib/api';\nimport { useMutation, useQueryClient } from '@tanstack/react-query';"
+  "import { characterService, Character } from '@/lib/api';\nimport { useMutation, useQueryClient } from '@tanstack/react-query';",
 );
 
 // Add Delete Mutation
@@ -41,8 +41,9 @@ const deleteMutationStr = `
 `;
 
 code = code.replace(
-  "const { data: characters, isLoading, error } = useQuery({",
-  deleteMutationStr + "\n  const { data: characters, isLoading, error } = useQuery({"
+  'const { data: characters, isLoading, error } = useQuery({',
+  deleteMutationStr +
+    '\n  const { data: characters, isLoading, error } = useQuery({',
 );
 
 // Add action buttons to Card
@@ -70,19 +71,16 @@ const actionsStr = `
                         </Box>
 `;
 
-code = code.replace(
-  /<IconButton[\s\S]*?<\/IconButton>/,
-  actionsStr
-);
+code = code.replace(/<IconButton[\s\S]*?<\/IconButton>/, actionsStr);
 
 code = code.replace(
   /<VoiceModal open=\{modalOpen\} onClose=\{\(\) => setModalOpen\(false\)\} \/>/,
-  `<VoiceModal open={modalOpen} onClose={() => { setModalOpen(false); setCharacterToEdit(null); }} characterToEdit={characterToEdit} />`
+  `<VoiceModal open={modalOpen} onClose={() => { setModalOpen(false); setCharacterToEdit(null); }} characterToEdit={characterToEdit} />`,
 );
 
 code = code.replace(
-  "onClick={() => setModalOpen(true)}",
-  "onClick={() => { setCharacterToEdit(null); setModalOpen(true); }}"
+  'onClick={() => setModalOpen(true)}',
+  'onClick={() => { setCharacterToEdit(null); setModalOpen(true); }}',
 );
 
 fs.writeFileSync('src/app/voices/page.tsx', code);

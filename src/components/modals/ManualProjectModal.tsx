@@ -2,8 +2,17 @@
 
 import React, { useState } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, MenuItem, CircularProgress, Box, Typography, IconButton
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Box,
+  Typography,
+  IconButton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,17 +23,20 @@ interface ManualProjectModalProps {
   onClose: () => void;
 }
 
-export default function ManualProjectModal({ open, onClose }: ManualProjectModalProps) {
+export default function ManualProjectModal({
+  open,
+  onClose,
+}: ManualProjectModalProps) {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('ru-RU');
   const [description, setDescription] = useState('');
-  
+
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!title) throw new Error("Title is required");
-      
+      if (!title) throw new Error('Title is required');
+
       const project = await projectService.createProject({
         title,
         description,
@@ -37,9 +49,9 @@ export default function ManualProjectModal({ open, onClose }: ManualProjectModal
       handleClose();
     },
     onError: (error) => {
-      console.error("Failed to create project", error);
-      alert("Failed to create project. Please try again.");
-    }
+      console.error('Failed to create project', error);
+      alert('Failed to create project. Please try again.');
+    },
   });
 
   const handleClose = () => {
@@ -70,14 +82,14 @@ export default function ManualProjectModal({ open, onClose }: ManualProjectModal
     },
     '& .MuiInputLabel-root.Mui-focused': {
       color: '#82B1FF',
-    }
+    },
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
       fullWidth
       slotProps={{
         paper: {
@@ -85,20 +97,26 @@ export default function ManualProjectModal({ open, onClose }: ManualProjectModal
             bgcolor: '#151A25',
             backgroundImage: 'none',
             borderRadius: 3,
-            border: '1px solid rgba(255,255,255,0.05)'
-          }
-        }
+            border: '1px solid rgba(255,255,255,0.05)',
+          },
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        pb: 1,
-        pt: 3,
-        px: 3
-      }}>
-        <Typography variant="h5" component="div" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pb: 1,
+          pt: 3,
+          px: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          component="div"
+          sx={{ fontWeight: 600, color: '#FFFFFF' }}
+        >
           Create New Project
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
@@ -116,7 +134,7 @@ export default function ManualProjectModal({ open, onClose }: ManualProjectModal
             disabled={mutation.isPending}
             sx={textFieldStyles}
           />
-          
+
           <TextField
             select
             label="Language"
@@ -145,34 +163,41 @@ export default function ManualProjectModal({ open, onClose }: ManualProjectModal
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
-        <Button 
-          onClick={handleClose} 
+        <Button
+          onClick={handleClose}
           disabled={mutation.isPending}
-          sx={{ color: '#94A3B8', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}
+          sx={{
+            color: '#94A3B8',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
+          }}
         >
           Cancel
         </Button>
-        <Button 
-          onClick={() => mutation.mutate()} 
-          variant="contained" 
+        <Button
+          onClick={() => mutation.mutate()}
+          variant="contained"
           disabled={!title || mutation.isPending}
-          sx={{ 
-            bgcolor: '#82B1FF', 
+          sx={{
+            bgcolor: '#82B1FF',
             color: '#0B1121',
             px: 3,
             borderRadius: 2,
             fontWeight: 600,
             textTransform: 'none',
             '&:hover': {
-              bgcolor: '#AECBFF'
+              bgcolor: '#AECBFF',
             },
             '&.Mui-disabled': {
               bgcolor: 'rgba(130, 177, 255, 0.3)',
-              color: 'rgba(11, 17, 33, 0.5)'
-            }
+              color: 'rgba(11, 17, 33, 0.5)',
+            },
           }}
         >
-          {mutation.isPending ? <CircularProgress size={24} sx={{ color: '#0B1121' }} /> : "Create Project"}
+          {mutation.isPending ? (
+            <CircularProgress size={24} sx={{ color: '#0B1121' }} />
+          ) : (
+            'Create Project'
+          )}
         </Button>
       </DialogActions>
     </Dialog>

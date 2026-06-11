@@ -1,46 +1,76 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Box, Typography, Button, Card, CardContent, Grid, CircularProgress, 
-  Container, Chip, LinearProgress
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  CircularProgress,
+  Container,
+  Chip,
+  LinearProgress,
 } from '@mui/material';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { useQuery } from '@tanstack/react-query';
 import { projectService } from '@/lib/api';
 import UploadBookModal from '@/components/modals/UploadBookModal';
 import ManualProjectModal from '@/components/modals/ManualProjectModal';
+import ItemCard from '@/components/cards/ItemCard';
 
 export default function ProjectsPage() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
 
-  const { data: projects, isLoading, error } = useQuery({
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['projects'],
     queryFn: projectService.getProjects,
   });
 
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: 4 } }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        p: { xs: 2, md: 4 },
+      }}
+    >
       {/* Header Area */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 5 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 5,
+        }}
+      >
         <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: '#FFFFFF', mb: 1 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{ fontWeight: 600, color: '#FFFFFF', mb: 1 }}
+          >
             Audiobook Creating Studio
           </Typography>
           <Typography variant="body1" sx={{ color: '#94A3B8' }}>
             {projects ? projects.length : 0} active productions
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setManualOpen(true)}
-          sx={{ 
-            bgcolor: '#82B1FF', 
+          sx={{
+            bgcolor: '#82B1FF',
             color: '#0B1121',
             px: 3,
             py: 1.5,
@@ -48,8 +78,8 @@ export default function ProjectsPage() {
             textTransform: 'none',
             fontWeight: 600,
             '&:hover': {
-              bgcolor: '#AECBFF'
-            }
+              bgcolor: '#AECBFF',
+            },
           }}
         >
           Create / Upload New Book
@@ -59,156 +89,128 @@ export default function ProjectsPage() {
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ flexGrow: 1, px: '0 !important' }}>
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '50vh',
+            }}
+          >
             <CircularProgress sx={{ color: '#82B1FF' }} />
           </Box>
         ) : error ? (
-          <Typography color="error">Failed to load projects. Ensure backend is running.</Typography>
+          <Typography color="error">
+            Failed to load projects. Ensure backend is running.
+          </Typography>
         ) : (
           <Grid container spacing={3}>
             {/* New Project Card (Dashed) */}
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <Card 
+              <ItemCard
+                title="New Project"
                 onClick={() => setUploadOpen(true)}
-                sx={{ 
-                  height: '100%', 
-                  minHeight: 280,
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
+                iconNode={<AddIcon sx={{ color: '#82B1FF', fontSize: 32 }} />}
+                sx={{
                   bgcolor: 'transparent',
                   border: '2px dashed rgba(130, 177, 255, 0.3)',
-                  transition: 'all 0.2s ease',
-                  '&:hover': { 
-                    borderColor: '#82B1FF',
-                    bgcolor: 'rgba(130, 177, 255, 0.05)'
-                  }
-                }}
-              >
-                <Box sx={{ 
-                  width: 56, 
-                  height: 56, 
-                  borderRadius: '50%', 
-                  bgcolor: 'rgba(130, 177, 255, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                  alignItems: 'center',
                   justifyContent: 'center',
-                  mb: 2
-                }}>
-                  <AddIcon sx={{ color: '#82B1FF', fontSize: 32 }} />
-                </Box>
-                <Typography variant="h6" sx={{ color: '#82B1FF', fontWeight: 500 }}>
-                  New Project
-                </Typography>
-              </Card>
+                  '&:hover': {
+                    borderColor: '#82B1FF',
+                    bgcolor: 'rgba(130, 177, 255, 0.05)',
+                  },
+                  '& .MuiCardContent-root': {
+                    flexGrow: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  },
+                }}
+              />
             </Grid>
 
             {/* Project Cards */}
             {projects?.map((project) => (
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={project.id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    minHeight: 280,
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    bgcolor: '#212836',
-                    position: 'relative'
+                <Link
+                  href={`/projects/${project.id}`}
+                  style={{
+                    textDecoration: 'none',
+                    display: 'block',
+                    height: '100%',
                   }}
                 >
-                  <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
-                    {/* Top Row: Icon and Menu */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                      <Box sx={{ 
-                        width: 48, 
-                        height: 48, 
-                        borderRadius: 2, 
-                        bgcolor: 'rgba(130, 177, 255, 0.1)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center'
-                      }}>
-                        <LibraryBooksIcon sx={{ color: '#82B1FF' }} />
+                  <ItemCard
+                    title={project.title}
+                    iconNode={
+                      <MenuBookOutlinedIcon sx={{ color: '#82B1FF' }} />
+                    }
+                    description={`Создано ${new Date(project.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+                    chips={[
+                      {
+                        label:
+                          project.language_code === 'ru-RU'
+                            ? 'Русский'
+                            : project.language_code || 'ru-RU',
+                      },
+                    ]}
+                    bottomContent={
+                      <Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 1.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                            {project.total_scenes || 0} scenes
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box sx={{ width: '100%', mr: 1 }}>
+                            <LinearProgress
+                              variant="determinate"
+                              value={
+                                project.total_scenes
+                                  ? Math.round(
+                                      ((project.completed_scenes || 0) /
+                                        project.total_scenes) *
+                                        100,
+                                    )
+                                  : 0
+                              }
+                              sx={{
+                                height: 6,
+                                borderRadius: 3,
+                                bgcolor: 'rgba(255,255,255,0.05)',
+                                '& .MuiLinearProgress-bar': {
+                                  bgcolor: '#82B1FF',
+                                },
+                              }}
+                            />
+                          </Box>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: '#82B1FF', fontWeight: 600 }}
+                          >
+                            {project.total_scenes
+                              ? Math.round(
+                                  ((project.completed_scenes || 0) /
+                                    project.total_scenes) *
+                                    100,
+                                )
+                              : 0}
+                            %
+                          </Typography>
+                        </Box>
                       </Box>
-                      <MoreVertIcon sx={{ color: '#94A3B8', cursor: 'pointer' }} />
-                    </Box>
-
-                    {/* Title and Date */}
-                    <Typography variant="h6" sx={{ color: '#FFFFFF', fontWeight: 600, mb: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {project.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#94A3B8', mb: 2 }}>
-                      {project.created_at ? `Создано ${new Date(project.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}
-                    </Typography>
-
-                    <Box sx={{ mb: 'auto' }}>
-                      <Chip 
-                        label={project.language_code === 'ru-RU' ? 'Русский' : project.language_code || 'ru-RU'} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: 'rgba(255,255,255,0.05)', 
-                          color: '#E2E8F0',
-                          borderRadius: 1,
-                          fontWeight: 500,
-                        }} 
-                      />
-                    </Box>
-
-                    {/* Stats */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3, mb: 1.5 }}>
-                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        {project.total_scenes || 0} scenes
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        {/* Dummy duration for now */}
-                      </Typography>
-                    </Box>
-
-                    {/* Progress Bar */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                      <Box sx={{ width: '100%', mr: 1 }}>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={project.total_scenes ? Math.round((project.completed_scenes || 0) / project.total_scenes * 100) : 0} 
-                          sx={{ 
-                            height: 6, 
-                            borderRadius: 3,
-                            bgcolor: 'rgba(255,255,255,0.05)',
-                            '& .MuiLinearProgress-bar': {
-                              bgcolor: '#82B1FF'
-                            }
-                          }} 
-                        />
-                      </Box>
-                      <Typography variant="caption" sx={{ color: '#82B1FF', fontWeight: 600 }}>
-                        {project.total_scenes ? Math.round((project.completed_scenes || 0) / project.total_scenes * 100) : 0}%
-                      </Typography>
-                    </Box>
-                  </CardContent>
-
-                  {/* Open Project Button at bottom */}
-                  <Box sx={{ p: 2, pt: 0 }}>
-                    <Link href={`/projects/${project.id}`} style={{ textDecoration: 'none' }}>
-                      <Button 
-                        fullWidth 
-                        variant="outlined" 
-                        sx={{ 
-                          borderColor: 'rgba(255,255,255,0.1)',
-                          color: '#FFFFFF',
-                          py: 1,
-                          '&:hover': {
-                            borderColor: '#82B1FF',
-                            bgcolor: 'rgba(130, 177, 255, 0.05)'
-                          }
-                        }}
-                      >
-                        Open Project
-                      </Button>
-                    </Link>
-                  </Box>
-                </Card>
+                    }
+                    actionButton={{
+                      text: 'Open Project',
+                    }}
+                  />
+                </Link>
               </Grid>
             ))}
           </Grid>
@@ -216,7 +218,10 @@ export default function ProjectsPage() {
       </Container>
 
       <UploadBookModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
-      <ManualProjectModal open={manualOpen} onClose={() => setManualOpen(false)} />
+      <ManualProjectModal
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+      />
     </Box>
   );
 }

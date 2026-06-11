@@ -17,7 +17,7 @@ const theme = createTheme({
     },
     background: {
       default: '#151A25', // Main app background
-      paper: '#212836',   // Card background
+      paper: '#212836', // Card background
     },
     text: {
       primary: '#FFFFFF',
@@ -52,9 +52,9 @@ const theme = createTheme({
         paper: {
           backgroundColor: '#10141D', // Sidebar background
           borderRight: '1px solid rgba(255, 255, 255, 0.05)',
-        }
-      }
-    }
+        },
+      },
+    },
   },
 });
 

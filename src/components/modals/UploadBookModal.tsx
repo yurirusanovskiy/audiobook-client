@@ -2,8 +2,17 @@
 
 import React, { useState } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, MenuItem, CircularProgress, Box, Typography, IconButton
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Box,
+  Typography,
+  IconButton,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
@@ -15,23 +24,26 @@ interface UploadBookModalProps {
   onClose: () => void;
 }
 
-export default function UploadBookModal({ open, onClose }: UploadBookModalProps) {
+export default function UploadBookModal({
+  open,
+  onClose,
+}: UploadBookModalProps) {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('ru-RU');
   const [file, setFile] = useState<File | null>(null);
-  
+
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!title || !file) throw new Error("Title and File are required");
-      
+      if (!title || !file) throw new Error('Title and File are required');
+
       const project = await projectService.createProject({
         title,
       });
-      
+
       const projectId = project.id;
-      if (!projectId) throw new Error("Failed to create project");
+      if (!projectId) throw new Error('Failed to create project');
 
       const uploadRes = await projectService.uploadBook(projectId, file);
       return uploadRes;
@@ -41,9 +53,9 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
       handleClose();
     },
     onError: (error) => {
-      console.error("Failed to upload book", error);
-      alert("Failed to upload book. Please try again.");
-    }
+      console.error('Failed to upload book', error);
+      alert('Failed to upload book. Please try again.');
+    },
   });
 
   const handleClose = () => {
@@ -80,14 +92,14 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
     },
     '& .MuiInputLabel-root.Mui-focused': {
       color: '#82B1FF',
-    }
+    },
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
       fullWidth
       slotProps={{
         paper: {
@@ -95,20 +107,26 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
             bgcolor: '#151A25',
             backgroundImage: 'none',
             borderRadius: 3,
-            border: '1px solid rgba(255,255,255,0.05)'
-          }
-        }
+            border: '1px solid rgba(255,255,255,0.05)',
+          },
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        pb: 1,
-        pt: 3,
-        px: 3
-      }}>
-        <Typography variant="h5" component="div" sx={{ fontWeight: 600, color: '#FFFFFF' }}>
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pb: 1,
+          pt: 3,
+          px: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          component="div"
+          sx={{ fontWeight: 600, color: '#FFFFFF' }}
+        >
           Create / Upload New Book
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: '#94A3B8' }}>
@@ -126,7 +144,7 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
             disabled={mutation.isPending}
             sx={textFieldStyles}
           />
-          
+
           <TextField
             select
             label="Language"
@@ -147,21 +165,21 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
             component="label"
             startIcon={<CloudUploadIcon />}
             fullWidth
-            sx={{ 
-              height: 100, 
-              borderStyle: 'dashed', 
+            sx={{
+              height: 100,
+              borderStyle: 'dashed',
               borderWidth: 2,
               borderColor: 'rgba(130, 177, 255, 0.3)',
               color: file ? '#FFFFFF' : '#82B1FF',
               bgcolor: file ? 'rgba(130, 177, 255, 0.1)' : 'transparent',
               '&:hover': {
                 borderColor: '#82B1FF',
-                bgcolor: 'rgba(130, 177, 255, 0.05)'
-              }
+                bgcolor: 'rgba(130, 177, 255, 0.05)',
+              },
             }}
             disabled={mutation.isPending}
           >
-            {file ? file.name : "Select Book File (.txt, .pdf, .epub, .docx)"}
+            {file ? file.name : 'Select Book File (.txt, .pdf, .epub, .docx)'}
             <input
               type="file"
               hidden
@@ -169,7 +187,7 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
               onChange={handleFileChange}
             />
           </Button>
-          
+
           {mutation.isPending && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <CircularProgress size={24} sx={{ color: '#82B1FF' }} />
@@ -181,31 +199,34 @@ export default function UploadBookModal({ open, onClose }: UploadBookModalProps)
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
-        <Button 
-          onClick={handleClose} 
+        <Button
+          onClick={handleClose}
           disabled={mutation.isPending}
-          sx={{ color: '#94A3B8', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}
+          sx={{
+            color: '#94A3B8',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
+          }}
         >
           Cancel
         </Button>
-        <Button 
-          onClick={() => mutation.mutate()} 
-          variant="contained" 
+        <Button
+          onClick={() => mutation.mutate()}
+          variant="contained"
           disabled={!title || !file || mutation.isPending}
-          sx={{ 
-            bgcolor: '#82B1FF', 
+          sx={{
+            bgcolor: '#82B1FF',
             color: '#0B1121',
             px: 3,
             borderRadius: 2,
             fontWeight: 600,
             textTransform: 'none',
             '&:hover': {
-              bgcolor: '#AECBFF'
+              bgcolor: '#AECBFF',
             },
             '&.Mui-disabled': {
               bgcolor: 'rgba(130, 177, 255, 0.3)',
-              color: 'rgba(11, 17, 33, 0.5)'
-            }
+              color: 'rgba(11, 17, 33, 0.5)',
+            },
           }}
         >
           Create Project

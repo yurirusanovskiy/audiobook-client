@@ -1,9 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Box, Typography, Button, Card, CardContent, Grid, CircularProgress, 
-  Container, TextField, InputAdornment, IconButton, Chip 
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  CircularProgress,
+  Container,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,21 +26,23 @@ import { useQuery } from '@tanstack/react-query';
 import { characterService, Character } from '@/lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import VoiceModal from '@/components/modals/VoiceModal';
+import ItemCard from '@/components/cards/ItemCard';
 
 export default function VoicesPage() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [characterToEdit, setCharacterToEdit] = useState<Character | null>(null);
+  const [characterToEdit, setCharacterToEdit] = useState<Character | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [playingId, setPlayingId] = useState<string | null>(null);
 
-  
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: characterService.deleteCharacter,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['characters'] });
-    }
+    },
   });
 
   const handleDelete = (id: string) => {
@@ -44,15 +56,21 @@ export default function VoicesPage() {
     setModalOpen(true);
   };
 
-  const { data: characters, isLoading, error } = useQuery({
+  const {
+    data: characters,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['characters'],
     queryFn: characterService.getCharacters,
   });
 
-  const filteredCharacters = characters?.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.voice_id.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredCharacters =
+    characters?.filter(
+      (c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.voice_id.toLowerCase().includes(searchQuery.toLowerCase()),
+    ) || [];
 
   const handlePlaySample = (charId: string, sampleUrl?: string) => {
     if (!sampleUrl) return;
@@ -64,23 +82,44 @@ export default function VoicesPage() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: 4 } }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        p: { xs: 2, md: 4 },
+      }}
+    >
       {/* Header Area */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 4,
+        }}
+      >
         <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: '#FFFFFF', mb: 1 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{ fontWeight: 600, color: '#FFFFFF', mb: 1 }}
+          >
             Voice Profiles
           </Typography>
           <Typography variant="body1" sx={{ color: '#94A3B8' }}>
             Manage and audition AI voices for your cast
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => { setCharacterToEdit(null); setModalOpen(true); }}
-          sx={{ 
-            bgcolor: '#82B1FF', 
+          onClick={() => {
+            setCharacterToEdit(null);
+            setModalOpen(true);
+          }}
+          sx={{
+            bgcolor: '#82B1FF',
             color: '#0B1121',
             px: 3,
             py: 1.5,
@@ -88,8 +127,8 @@ export default function VoicesPage() {
             textTransform: 'none',
             fontWeight: 600,
             '&:hover': {
-              bgcolor: '#AECBFF'
-            }
+              bgcolor: '#AECBFF',
+            },
           }}
         >
           New Character
@@ -117,7 +156,7 @@ export default function VoicesPage() {
             '&.Mui-focused fieldset': {
               borderColor: '#82B1FF',
             },
-          }
+          },
         }}
         slotProps={{
           input: {
@@ -126,19 +165,36 @@ export default function VoicesPage() {
                 <SearchIcon sx={{ color: '#94A3B8' }} />
               </InputAdornment>
             ),
-          }
+          },
         }}
       />
 
       <Container maxWidth="xl" sx={{ flexGrow: 1, px: '0 !important' }}>
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40vh' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '40vh',
+            }}
+          >
             <CircularProgress sx={{ color: '#82B1FF' }} />
           </Box>
         ) : error ? (
-          <Typography color="error">Failed to load voices. Ensure backend is running.</Typography>
+          <Typography color="error">
+            Failed to load voices. Ensure backend is running.
+          </Typography>
         ) : filteredCharacters.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '40vh',
+            }}
+          >
             <Typography variant="h6" sx={{ color: '#94A3B8' }}>
               No characters found.
             </Typography>
@@ -151,102 +207,79 @@ export default function VoicesPage() {
 
               return (
                 <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={char.id}>
-                  <Card 
-                    sx={{ 
-                      height: '100%', 
-                      display: 'flex', 
-                      flexDirection: 'column',
-                      bgcolor: '#212836',
-                      transition: 'all 0.2s',
-                      '&:hover': { borderColor: '#82B1FF' }
-                    }}
-                  >
-                    <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Box sx={{ 
-                            width: 48, 
-                            height: 48, 
-                            borderRadius: '50%', 
-                            bgcolor: 'rgba(130, 177, 255, 0.1)', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center'
-                          }}>
-                            <PersonIcon sx={{ color: '#82B1FF' }} />
-                          </Box>
-                          <Box>
-                            <Typography variant="h6" sx={{ color: '#FFFFFF', fontWeight: 600, lineHeight: 1.2 }}>
-                              {char.name}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: '#94A3B8', fontFamily: 'var(--font-geist-mono)' }}>
-                              {char.voice_id.substring(0, 8)}...
-                            </Typography>
-                          </Box>
-                        </Box>
-                        
-                        <Box sx={{ display: 'flex' }}>
-                          <IconButton size="small" onClick={() => handleEdit(char)} sx={{ color: '#94A3B8', '&:hover': { color: '#82B1FF' } }}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton size="small" onClick={() => handleDelete(char.id)} sx={{ color: '#94A3B8', '&:hover': { color: '#EF4444' } }}>
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton 
-                            sx={{ 
-                              color: isPlaying ? '#82B1FF' : '#94A3B8',
-                              bgcolor: isPlaying ? 'rgba(130, 177, 255, 0.1)' : 'transparent',
-                              ml: 1
-                            }}
-                            disabled={!hasAudioSample}
-                            onClick={() => handlePlaySample(char.id, char.sample_audio_url)}
-                            title="Play Sample"
-                            size="small"
-                          >
-                            {hasAudioSample ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
-                          </IconButton>
-                        </Box>
-
-                      </Box>
-                      
-                      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', mt: 1 }}>
-                        {char.gender && (
-                          <Chip 
-                            label={char.gender} 
-                            size="small" 
-                            sx={{ 
-                              bgcolor: 'rgba(255,255,255,0.05)', 
-                              color: '#E2E8F0',
-                              borderRadius: 1,
-                              fontWeight: 500,
-                              textTransform: 'capitalize'
-                            }} 
-                          />
-                        )}
-                        {char.age_category && (
-                          <Chip 
-                            label={char.age_category} 
-                            size="small" 
-                            sx={{ 
-                              bgcolor: 'rgba(255,255,255,0.05)', 
-                              color: '#E2E8F0',
-                              borderRadius: 1,
-                              fontWeight: 500,
-                              textTransform: 'capitalize'
-                            }} 
-                          />
-                        )}
-                      </Box>
-                      
-                      {char.prompt_style && (
-                        <Box sx={{ mt: 'auto', pt: 2, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                          <Typography variant="body2" sx={{ color: '#94A3B8', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                            &quot;{char.prompt_style}&quot;
-                          </Typography>
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <ItemCard
+                    title={char.name}
+                    subtitle={`${char.voice_id.substring(0, 8)}...`}
+                    iconNode={<PersonIcon sx={{ color: '#82B1FF' }} />}
+                    chips={[
+                      ...(char.gender ? [{ label: char.gender }] : []),
+                      ...(char.age_category
+                        ? [{ label: char.age_category }]
+                        : []),
+                    ]}
+                    bottomContent={
+                      char.prompt_style ? (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: '#94A3B8',
+                            fontStyle: 'italic',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          &quot;{char.prompt_style}&quot;
+                        </Typography>
+                      ) : undefined
+                    }
+                    topRightActions={
+                      <>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(char)}
+                          sx={{
+                            color: '#94A3B8',
+                            '&:hover': { color: '#82B1FF' },
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(char.id)}
+                          sx={{
+                            color: '#94A3B8',
+                            '&:hover': { color: '#EF4444' },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          sx={{
+                            color: isPlaying ? '#82B1FF' : '#94A3B8',
+                            bgcolor: isPlaying
+                              ? 'rgba(130, 177, 255, 0.1)'
+                              : 'transparent',
+                            ml: 1,
+                          }}
+                          disabled={!hasAudioSample}
+                          onClick={() =>
+                            handlePlaySample(char.id, char.sample_audio_url)
+                          }
+                          title="Play Sample"
+                          size="small"
+                        >
+                          {hasAudioSample ? (
+                            <VolumeUpIcon fontSize="small" />
+                          ) : (
+                            <VolumeOffIcon fontSize="small" />
+                          )}
+                        </IconButton>
+                      </>
+                    }
+                  />
                 </Grid>
               );
             })}
@@ -254,7 +287,14 @@ export default function VoicesPage() {
         )}
       </Container>
 
-      <VoiceModal open={modalOpen} onClose={() => { setModalOpen(false); setCharacterToEdit(null); }} characterToEdit={characterToEdit} />
+      <VoiceModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setCharacterToEdit(null);
+        }}
+        characterToEdit={characterToEdit}
+      />
     </Box>
   );
 }

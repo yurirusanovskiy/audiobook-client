@@ -1,23 +1,22 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
-import { Providers } from "@/components/Providers";
-import AppLayout from "@/components/layout/AppLayout";
+import { Providers } from '@/components/Providers';
+import AppLayout from '@/components/layout/AppLayout';
 
 export const metadata: Metadata = {
-  title: "Audiobooks TTS Platform",
-  description: "AI-powered Casting Director and Audio generation platform",
+  title: 'Audiobooks TTS Platform',
+  description: 'AI-powered Casting Director and Audio generation platform',
 };
 
 export default function RootLayout({
@@ -29,9 +28,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <Providers>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <AppLayout>{children}</AppLayout>
         </Providers>
       </body>
     </html>

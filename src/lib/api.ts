@@ -16,8 +16,8 @@ export interface Character {
   voice_id: string;
   prompt_style?: string;
   pitch_override?: string;
-  gender?: "male" | "female";
-  age_category?: "child" | "young" | "adult" | "elderly";
+  gender?: 'male' | 'female';
+  age_category?: 'child' | 'young' | 'adult' | 'elderly';
   sample_audio_url?: string;
   language_profiles?: LanguageProfile[];
 }
@@ -27,7 +27,7 @@ export interface DiscoveredCharacter {
   traits: string;
   gender: string;
   age_category: string;
-  action: "use_existing" | "create_new";
+  action: 'use_existing' | 'create_new';
   existing_character_id?: string;
   suggested_voice_id?: string;
 }
@@ -69,7 +69,7 @@ export interface Scene {
   title: string;
   raw_text?: string;
   script_json?: unknown; // Represents the breakdown of dialogues
-  status?: "draft" | "processing" | "extracted" | "completed" | "error";
+  status?: 'draft' | 'processing' | 'extracted' | 'completed' | 'error';
   lines?: SceneLine[];
   audio_url?: string;
   created_at?: string;
@@ -86,53 +86,126 @@ export const api = axios.create({
 
 // Helper services for clean React Query integration
 export const projectService = {
-  getProjects: () => api.get<Project[]>('/projects').then(res => res.data),
-  getProject: (id: string) => api.get<Project>(`/projects/${id}`).then(res => res.data),
-  createProject: (data: Partial<Project>) => api.post<Project>('/projects', data).then(res => res.data),
-  updateProject: (id: string, data: Partial<Project>) => api.put<Project>(`/projects/${id}`, data).then(res => res.data),
-  deleteProject: (id: string) => api.delete(`/projects/${id}`).then(res => res.data),
-  
+  getProjects: () => api.get<Project[]>('/projects').then((res) => res.data),
+  getProject: (id: string) =>
+    api.get<Project>(`/projects/${id}`).then((res) => res.data),
+  createProject: (data: Partial<Project>) =>
+    api.post<Project>('/projects', data).then((res) => res.data),
+  updateProject: (id: string, data: Partial<Project>) =>
+    api.put<Project>(`/projects/${id}`, data).then((res) => res.data),
+  deleteProject: (id: string) =>
+    api.delete(`/projects/${id}`).then((res) => res.data),
+
   uploadBook: (id: string, file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post(`/projects/${id}/upload-book`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }).then(res => res.data);
+    return api
+      .post(`/projects/${id}/upload-book`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data);
   },
-  
-  getProjectCharacters: (id: string) => api.get<Character[]>(`/projects/${id}/characters`).then(res => res.data),
-  linkCharacter: (projectId: string, characterId: string) => api.post(`/projects/${projectId}/characters/${characterId}`).then(res => res.data),
-  discoverCharacters: (projectId: string, rawText: string) => api.post<DiscoveredCharacter[]>(`/projects/${projectId}/characters/discover`, { raw_text: rawText }).then(res => res.data),
-  batchSaveCharacters: (projectId: string, suggestions: DiscoveredCharacter[]) => api.post(`/projects/${projectId}/characters/batch`, { suggestions }).then(res => res.data),
+
+  getProjectCharacters: (id: string) =>
+    api.get<Character[]>(`/projects/${id}/characters`).then((res) => res.data),
+  linkCharacter: (projectId: string, characterId: string) =>
+    api
+      .post(`/projects/${projectId}/characters/${characterId}`)
+      .then((res) => res.data),
+  swapCharacter: (
+    projectId: string,
+    oldCharacterId: string,
+    newCharacterId: string,
+  ) =>
+    api
+      .post(`/projects/${projectId}/characters/swap`, {
+        old_character_id: oldCharacterId,
+        new_character_id: newCharacterId,
+      })
+      .then((res) => res.data),
+  discoverCharacters: (projectId: string, rawText: string) =>
+    api
+      .post<
+        DiscoveredCharacter[]
+      >(`/projects/${projectId}/characters/discover`, { raw_text: rawText })
+      .then((res) => res.data),
+  batchSaveCharacters: (
+    projectId: string,
+    suggestions: DiscoveredCharacter[],
+  ) =>
+    api
+      .post(`/projects/${projectId}/characters/batch`, { suggestions })
+      .then((res) => res.data),
 };
 
 export const characterService = {
-  getCharacters: () => api.get<Character[]>('/characters').then(res => res.data),
-  getCharacter: (id: string) => api.get<Character>(`/characters/${id}`).then(res => res.data),
-  createCharacter: (data: Character) => api.post<Character>('/characters', data).then(res => res.data),
-  updateCharacter: (id: string, data: Partial<Character>) => api.put<Character>(`/characters/${id}`, data).then(res => res.data),
-  deleteCharacter: (id: string) => api.delete(`/characters/${id}`).then(res => res.data),
-  
-  createLanguageProfile: (characterId: string, data: LanguageProfile) => api.post<LanguageProfile>(`/characters/${characterId}/language-profiles/`, data).then(res => res.data),
-  updateLanguageProfile: (characterId: string, profileId: number, data: Partial<LanguageProfile>) => api.put<LanguageProfile>(`/characters/${characterId}/language-profiles/${profileId}`, data).then(res => res.data),
-  deleteLanguageProfile: (characterId: string, profileId: number) => api.delete(`/characters/${characterId}/language-profiles/${profileId}`).then(res => res.data),
-  generateSample: (characterId: string) => api.post<Character>(`/characters/${characterId}/generate-sample`).then(res => res.data),
+  getCharacters: () =>
+    api.get<Character[]>('/characters').then((res) => res.data),
+  getCharacter: (id: string) =>
+    api.get<Character>(`/characters/${id}`).then((res) => res.data),
+  createCharacter: (data: Character) =>
+    api.post<Character>('/characters', data).then((res) => res.data),
+  updateCharacter: (id: string, data: Partial<Character>) =>
+    api.put<Character>(`/characters/${id}`, data).then((res) => res.data),
+  deleteCharacter: (id: string) =>
+    api.delete(`/characters/${id}`).then((res) => res.data),
+
+  createLanguageProfile: (characterId: string, data: LanguageProfile) =>
+    api
+      .post<LanguageProfile>(
+        `/characters/${characterId}/language-profiles/`,
+        data,
+      )
+      .then((res) => res.data),
+  updateLanguageProfile: (
+    characterId: string,
+    profileId: number,
+    data: Partial<LanguageProfile>,
+  ) =>
+    api
+      .put<LanguageProfile>(
+        `/characters/${characterId}/language-profiles/${profileId}`,
+        data,
+      )
+      .then((res) => res.data),
+  deleteLanguageProfile: (characterId: string, profileId: number) =>
+    api
+      .delete(`/characters/${characterId}/language-profiles/${profileId}`)
+      .then((res) => res.data),
+  generateSample: (characterId: string) =>
+    api
+      .post<Character>(`/characters/${characterId}/generate-sample`)
+      .then((res) => res.data),
 };
 
 export const sceneService = {
-  getScenes: (projectId: string) => api.get<Scene[]>(`/projects/${projectId}/scenes`).then(res => res.data),
-  getScene: (id: string) => api.get<Scene>(`/scenes/${id}`).then(res => res.data),
-  createScene: (projectId: string, data: Partial<Scene>) => api.post<Scene>(`/projects/${projectId}/scenes`, data).then(res => res.data),
-  updateScene: (id: string, data: Partial<Scene>) => api.put<Scene>(`/scenes/${id}`, data).then(res => res.data),
-  deleteScene: (id: string) => api.delete(`/scenes/${id}`).then(res => res.data),
-  extractScript: (id: string) => api.post(`/scenes/${id}/extract`).then(res => res.data),
-  generateAudio: (id: string) => api.post(`/scenes/${id}/generate-audio`).then(res => res.data),
-  generateLineAudio: (sceneId: string, lineId: number) => api.post(`/scenes/${sceneId}/lines/${lineId}/generate-audio`).then(res => res.data),
+  getScenes: (projectId: string) =>
+    api.get<Scene[]>(`/projects/${projectId}/scenes`).then((res) => res.data),
+  getScene: (id: string) =>
+    api.get<Scene>(`/scenes/${id}`).then((res) => res.data),
+  createScene: (projectId: string, data: Partial<Scene>) =>
+    api
+      .post<Scene>(`/projects/${projectId}/scenes`, data)
+      .then((res) => res.data),
+  updateScene: (id: string, data: Partial<Scene>) =>
+    api.put<Scene>(`/scenes/${id}`, data).then((res) => res.data),
+  deleteScene: (id: string) =>
+    api.delete(`/scenes/${id}`).then((res) => res.data),
+  extractScript: (id: string) =>
+    api.post(`/scenes/${id}/extract`).then((res) => res.data),
+  generateAudio: (id: string) =>
+    api.post(`/scenes/${id}/generate-audio`).then((res) => res.data),
+  generateLineAudio: (sceneId: string, lineId: number) =>
+    api
+      .post(`/scenes/${sceneId}/lines/${lineId}/generate-audio`)
+      .then((res) => res.data),
 };
 
 export const processingService = {
-  preprocessLines: (projectId: string, lines: SceneLine[]) => 
-    api.post(`/processing/preprocess-only`, { project_id: projectId, lines }).then(res => res.data),
+  preprocessLines: (projectId: string, lines: SceneLine[]) =>
+    api
+      .post(`/processing/preprocess-only`, { project_id: projectId, lines })
+      .then((res) => res.data),
 };
 
 export interface DictionaryEntry {
@@ -140,12 +213,18 @@ export interface DictionaryEntry {
   language: string;
   word: string;
   phonetic_replacement: string;
-  entry_type?: "word" | "name" | "place";
+  entry_type?: 'word' | 'name' | 'place';
 }
 
 export const dictionaryService = {
-  getEntries: (language?: string) => api.get<DictionaryEntry[]>('/dictionary', { params: { language } }).then(res => res.data),
-  createEntry: (data: DictionaryEntry) => api.post<DictionaryEntry>('/dictionary', data).then(res => res.data),
-  updateEntry: (id: number, data: DictionaryEntry) => api.put<DictionaryEntry>(`/dictionary/${id}`, data).then(res => res.data),
-  deleteEntry: (id: number) => api.delete(`/dictionary/${id}`).then(res => res.data),
+  getEntries: (language?: string) =>
+    api
+      .get<DictionaryEntry[]>('/dictionary', { params: { language } })
+      .then((res) => res.data),
+  createEntry: (data: DictionaryEntry) =>
+    api.post<DictionaryEntry>('/dictionary', data).then((res) => res.data),
+  updateEntry: (id: number, data: DictionaryEntry) =>
+    api.put<DictionaryEntry>(`/dictionary/${id}`, data).then((res) => res.data),
+  deleteEntry: (id: number) =>
+    api.delete(`/dictionary/${id}`).then((res) => res.data),
 };
