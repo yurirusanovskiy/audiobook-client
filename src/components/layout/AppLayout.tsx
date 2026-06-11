@@ -15,6 +15,7 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutlined';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
 import HeadphonesOutlinedIcon from '@mui/icons-material/HeadphonesOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -31,6 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: <HistoryEduOutlinedIcon sx={{ fontSize: 28 }} />,
       path: '/dictionary',
     },
+    { text: 'Settings', icon: <SettingsOutlinedIcon />, path: '/settings' },
   ];
 
   return (

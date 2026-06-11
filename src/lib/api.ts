@@ -239,3 +239,27 @@ export const dictionaryService = {
   deleteEntry: (id: number) =>
     api.delete(`/dictionary/${id}`).then((res) => res.data),
 };
+export interface APIKey {
+  id: number;
+  name: string;
+  is_exhausted: boolean;
+  is_active: boolean;
+}
+
+export interface APIKeyCreate {
+  name: string;
+  key_value: string;
+}
+
+export interface Settings {
+  id: number;
+  active_api_key_id: number | null;
+}
+
+export const settingsService = {
+  getSettings: () => api.get<Settings>('/settings').then(res => res.data),
+  getApiKeys: () => api.get<APIKey[]>('/settings/api-keys').then(res => res.data),
+  addApiKey: (data: APIKeyCreate) => api.post('/settings/api-keys', data).then(res => res.data),
+  deleteApiKey: (id: number) => api.delete(`/settings/api-keys/${id}`).then(res => res.data),
+  activateApiKey: (id: number) => api.post(`/settings/api-keys/${id}/activate`).then(res => res.data),
+};
