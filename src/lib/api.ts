@@ -13,6 +13,7 @@ export interface LanguageProfile {
 export interface Character {
   id: string;
   name: string;
+  alias?: string | null;
   voice_id: string;
   prompt_style?: string;
   pitch_override?: string;
@@ -126,6 +127,10 @@ export const projectService = {
   linkCharacter: (projectId: string, characterId: string) =>
     api
       .post(`/projects/${projectId}/characters/${characterId}`)
+      .then((res) => res.data),
+  updateCharacterAlias: (projectId: string, characterId: string, alias: string) =>
+    api
+      .put(`/projects/${projectId}/characters/${characterId}/alias`, { alias })
       .then((res) => res.data),
   swapCharacter: (
     projectId: string,

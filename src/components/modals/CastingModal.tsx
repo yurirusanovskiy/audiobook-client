@@ -37,15 +37,14 @@ export default function CastingModal({
     DiscoveredCharacter[] | null
   >(null);
 
-  // Take the first few scenes' text to give the AI context for discovering characters
-  const sampleText = scenes
-    .slice(0, 3)
-    .map((s) => s.raw_text)
-    .join('\n\n')
-    .substring(0, 8000);
+  // Send the full concatenated text of ALL scenes so that characters
+  // appearing in the middle or end of the book are not missed.
+  const fullBookText = scenes
+    .map((s) => s.raw_text || '')
+    .join('\n\n');
 
   const discoverMutation = useMutation({
-    mutationFn: () => projectService.discoverCharacters(projectId, sampleText),
+    mutationFn: () => projectService.discoverCharacters(projectId, fullBookText),
     onSuccess: (data) => {
       setDiscoveredCharacters(data);
     },
@@ -166,9 +165,9 @@ export default function CastingModal({
                   variant="body2"
                   sx={{ color: '#94A3B8', mb: 3, maxWidth: 400 }}
                 >
-                  We will analyze the first few scenes of your book to identify
-                  the main characters and suggest the perfect voice actors from
-                  our database.
+                  We will analyze the entire book to identify all characters
+                  — including those appearing later in the story — and suggest
+                  the perfect voice actors from our database.
                 </Typography>
                 <Button
                   variant="contained"

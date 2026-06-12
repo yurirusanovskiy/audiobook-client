@@ -19,6 +19,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUpOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutlined';
+import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   api,
@@ -31,6 +32,7 @@ import {
 import CastingModal from '@/components/modals/CastingModal';
 import VoiceModal from '@/components/modals/VoiceModal';
 import SwapCharacterModal from '@/components/modals/SwapCharacterModal';
+import AliasModal from '@/components/modals/AliasModal';
 
 interface CastingDirectorSectionProps {
   projectId: string;
@@ -48,6 +50,10 @@ export default function CastingDirectorSection({
     useState<Character | null>(null);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [characterToSwap, setCharacterToSwap] = useState<Character | null>(
+    null,
+  );
+  const [aliasModalOpen, setAliasModalOpen] = useState(false);
+  const [characterToAlias, setCharacterToAlias] = useState<Character | null>(
     null,
   );
 
@@ -101,6 +107,20 @@ export default function CastingDirectorSection({
     },
   });
 
+  const aliasMutation = useMutation({
+    mutationFn: ({ characterId, alias }: { characterId: string; alias: string }) =>
+      projectService.updateCharacterAlias(projectId, characterId, alias),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['projectCharacters', projectId],
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to update alias', error);
+      alert('Failed to update alias.');
+    },
+  });
+
   const handleEdit = (char: Character) => {
     setCharacterToDuplicate(char);
     setDuplicateModalOpen(true);
@@ -109,6 +129,11 @@ export default function CastingDirectorSection({
   const handleSwap = (char: Character) => {
     setCharacterToSwap(char);
     setSwapModalOpen(true);
+  };
+
+  const handleAliasOpen = (char: Character) => {
+    setCharacterToAlias(char);
+    setAliasModalOpen(true);
   };
 
   const handlePlaySample = (audioUrl: string | undefined) => {
@@ -197,19 +222,34 @@ export default function CastingDirectorSection({
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 2,
+                        gap: 1,
                         mb: 0.5,
+                        flexWrap: 'wrap',
                       }}
                     >
+                      {/* Primary display: alias (role name in this project) */}
                       <Typography
                         sx={{
                           color: '#FFFFFF',
-                          fontWeight: 600,
-                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          fontSize: '1.05rem',
                         }}
                       >
-                        {char.name}
+                        {char.alias || char.name}
                       </Typography>
+                      {/* If alias differs from global name, show "voiced by" indicator */}
+                      {char.alias && char.alias !== char.name && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: '#82B1FF',
+                            fontStyle: 'italic',
+                            fontSize: '0.8rem',
+                          }}
+                        >
+                          voiced by {char.name}
+                        </Typography>
+                      )}
                       <Chip
                         label={char.gender}
                         size="small"
@@ -281,6 +321,20 @@ export default function CastingDirectorSection({
                         </IconButton>
                       </Tooltip>
                     )}
+
+                    <Tooltip title="Edit Role Alias (project-specific name)">
+                      <IconButton
+                        onClick={() => handleAliasOpen(char)}
+                        sx={{
+                          color: char.alias && char.alias !== char.name
+                            ? '#82B1FF'
+                            : '#94A3B8',
+                          '&:hover': { color: '#82B1FF' },
+                        }}
+                      >
+                        <LabelOutlinedIcon />
+                      </IconButton>
+                    </Tooltip>
 
                     <Tooltip title="Edit Character Voice">
                       <IconButton
@@ -365,6 +419,20 @@ export default function CastingDirectorSection({
           characterToReplace={characterToSwap}
         />
       )}
+
+      <AliasModal
+        open={aliasModalOpen}
+        onClose={() => {
+          setAliasModalOpen(false);
+          setCharacterToAlias(null);
+        }}
+        character={characterToAlias}
+        onSave={(alias) => {
+          if (characterToAlias) {
+            aliasMutation.mutate({ characterId: characterToAlias.id!, alias });
+          }
+        }}
+      />
     </Box>
   );
 }
