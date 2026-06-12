@@ -77,7 +77,7 @@ export interface Scene {
   updated_at?: string;
 }
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
 
 // Axios instance configured to point to our backend API
 export const api = axios.create({
