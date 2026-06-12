@@ -107,27 +107,27 @@ export function AudioPlayerBar({ audioUrl, isGenerating = false, onGenerate, onD
           fontSize: '0.875rem',
           transition: 'all 0.2s',
           background: isGenerated
-            ? "rgba(110,231,183,0.15)"
+            ? "linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 100%)"
             : "linear-gradient(135deg, #90caf9 0%, #a5b4fc 100%)",
-          color: isGenerated ? "#6ee7b7" : "#0f172a",
-          border: isGenerated ? "1px solid rgba(110,231,183,0.3)" : "none",
-          boxShadow: isGenerated ? "none" : "0 0 20px rgba(144,202,249,0.35)",
+          color: "#0f172a",
+          border: "none",
+          boxShadow: isGenerated ? "0 0 20px rgba(165,180,252,0.35)" : "0 0 20px rgba(144,202,249,0.35)",
           '&:hover': {
             background: isGenerated
-              ? "rgba(110,231,183,0.25)"
+              ? "linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 100%)"
               : "linear-gradient(135deg, #90caf9 0%, #a5b4fc 100%)",
             opacity: 0.9,
           },
           '&.Mui-disabled': {
             opacity: 0.6,
-            color: isGenerated ? "#6ee7b7" : "#0f172a",
+            color: "#0f172a",
           }
         }}
       >
         {isGenerating ? (
           <><Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} /> Generating…</>
         ) : isGenerated ? (
-          <>✓ Audio Ready</>
+          <>⚡ Regenerate Audio</>
         ) : (
           <>⚡ Generate Audio</>
         )}
