@@ -89,10 +89,14 @@ export const api = axios.create({
 
 export function getAudioUrl(pathOrUrl: string): string {
   if (!pathOrUrl) return '';
-  if (pathOrUrl.startsWith('/static/')) {
-    return BACKEND_URL + pathOrUrl;
+  const parts = pathOrUrl.split('?');
+  const cleanPath = parts[0];
+  const queryParams = parts.length > 1 ? `&${parts[1]}` : '';
+
+  if (cleanPath.startsWith('/static/')) {
+    return BACKEND_URL + cleanPath + (parts.length > 1 ? `?${parts[1]}` : '');
   }
-  return `${BACKEND_URL}/api/v1/projects/stream-audio?path=${encodeURIComponent(pathOrUrl)}`;
+  return `${BACKEND_URL}/api/v1/projects/stream-audio?path=${encodeURIComponent(cleanPath)}${queryParams}`;
 }
 
 // Helper services for clean React Query integration
