@@ -31,6 +31,7 @@ import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AudioPlayerBar } from '@/components/player/AudioPlayerBar';
 import {
   sceneService,
   projectService,
@@ -786,89 +787,17 @@ export default function SceneEditorPage() {
       </Box>
 
       {/* Global Audio Player Bar */}
-      <Box
-        sx={{
-          p: 2,
-          px: 3,
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          bgcolor: '#151A25',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 3,
-          position: 'fixed',
-          bottom: 0,
-          left: 88, // Account for sidebar width
-          right: 0,
-          zIndex: 10,
-        }}
-      >
-        <audio
-          controls
-          src={scene.audio_url ? getAudioUrl(scene.audio_url) : undefined}
-          style={{
-            flexGrow: 1,
-            height: 40,
-            opacity: scene.audio_url ? 1 : 0.4,
-          }}
-        />
-
-        <Button
-          variant={scene.audio_url ? 'outlined' : 'contained'}
-          color={scene.audio_url ? 'primary' : 'secondary'}
-          startIcon={
-            generateAudioMutation.isPending ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : scene.audio_url ? (
-              <ReplayIcon />
-            ) : (
-              <PlayCircleOutlineIcon />
-            )
-          }
-          onClick={() => generateAudioMutation.mutate()}
-          disabled={generateAudioMutation.isPending || !isExtracted}
-          sx={{
-            bgcolor: scene.audio_url ? 'transparent' : '#82B1FF',
-            color: scene.audio_url ? '#82B1FF' : '#0f172a',
-            borderColor: scene.audio_url ? '#82B1FF' : 'transparent',
-            fontWeight: 600,
-            textTransform: 'none',
-            borderRadius: 2,
-            minWidth: 160,
-            '&:hover': {
-              bgcolor: scene.audio_url ? 'rgba(130, 177, 255, 0.1)' : '#AECBFF',
-            },
-          }}
-        >
-          {generateAudioMutation.isPending
-            ? 'Generating...'
-            : scene.audio_url
-              ? 'Regenerate Scene'
-              : 'Generate Audio'}
-        </Button>
-
-        {scene.audio_url && (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() =>
-              window.open(
-                `http://127.0.0.1:8000/api/v1/scenes/${sceneId}/download-stems`,
-                '_blank',
-              )
-            }
-            sx={{
-              bgcolor: '#4CAF50',
-              color: '#fff',
-              fontWeight: 600,
-              textTransform: 'none',
-              borderRadius: 2,
-              '&:hover': { bgcolor: '#45a049' },
-            }}
-          >
-            Download Stems (ZIP)
-          </Button>
-        )}
-      </Box>
+      <AudioPlayerBar
+        audioUrl={scene.audio_url ? getAudioUrl(scene.audio_url) : null}
+        isGenerating={generateAudioMutation.isPending}
+        onGenerate={() => generateAudioMutation.mutate()}
+        onDownloadStems={() =>
+          window.open(
+            `http://127.0.0.1:8000/api/v1/scenes/${sceneId}/download-stems`,
+            '_blank',
+          )
+        }
+      />
     </Box>
   );
 }
