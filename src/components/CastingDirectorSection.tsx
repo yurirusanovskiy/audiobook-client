@@ -26,6 +26,7 @@ import {
   characterService,
   Character,
   Scene,
+  getAudioUrl,
 } from '@/lib/api';
 import CastingModal from '@/components/modals/CastingModal';
 import VoiceModal from '@/components/modals/VoiceModal';
@@ -112,7 +113,7 @@ export default function CastingDirectorSection({
 
   const handlePlaySample = (audioUrl: string | undefined) => {
     if (audioUrl) {
-      new Audio(`http://localhost:8000${audioUrl}`).play();
+      new Audio(getAudioUrl(audioUrl)).play();
     }
   };
 

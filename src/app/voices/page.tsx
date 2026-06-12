@@ -23,7 +23,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import PersonIcon from '@mui/icons-material/Person';
 import { useQuery } from '@tanstack/react-query';
-import { characterService, Character } from '@/lib/api';
+import { characterService, Character, getAudioUrl } from '@/lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import VoiceModal from '@/components/modals/VoiceModal';
 import ItemCard from '@/components/cards/ItemCard';
@@ -75,7 +75,7 @@ export default function VoicesPage() {
   const handlePlaySample = (charId: string, sampleUrl?: string) => {
     if (!sampleUrl) return;
     setPlayingId(charId);
-    const audio = new Audio(`http://localhost:8000${sampleUrl}`);
+    const audio = new Audio(getAudioUrl(sampleUrl));
     audio.play();
     audio.onended = () => setPlayingId(null);
     audio.onerror = () => setPlayingId(null);
