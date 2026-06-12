@@ -169,6 +169,14 @@ export default function CastingModal({
                   — including those appearing later in the story — and suggest
                   the perfect voice actors from our database.
                 </Typography>
+                {fullBookText.length > 50000 && (
+                  <Typography
+                    variant="caption"
+                    sx={{ color: '#82B1FF', mb: 3, display: 'block' }}
+                  >
+                    📖 {Math.round(fullBookText.length / 1000)}K characters · estimated {Math.round(fullBookText.length / 30000) + 20}–{Math.round(fullBookText.length / 15000) + 30}s
+                  </Typography>
+                )}
                 <Button
                   variant="contained"
                   onClick={() => discoverMutation.mutate()}
