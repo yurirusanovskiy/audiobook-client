@@ -72,6 +72,7 @@ export default function CastingModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
       queryClient.invalidateQueries({ queryKey: ['characters'] });
+      queryClient.invalidateQueries({ queryKey: ['projectCharacters', projectId] });
       handleClose();
     },
     onError: (error) => {
