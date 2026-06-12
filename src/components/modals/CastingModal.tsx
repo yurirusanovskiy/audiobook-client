@@ -68,10 +68,12 @@ export default function CastingModal({
   const saveMutation = useMutation({
     mutationFn: () =>
       projectService.batchSaveCharacters(projectId, discoveredCharacters || []),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['characters'] });
-      queryClient.invalidateQueries({ queryKey: ['projectCharacters', projectId] });
+    onSuccess: async () => {
+      // Use refetchQueries (not invalidateQueries) so the fresh data is
+      // fetched and in cache BEFORE the modal closes — otherwise the
+      // parent component re-renders with the stale list.
+      await queryClient.refetchQueries({ queryKey: ['projectCharacters', projectId] });
+      await queryClient.refetchQueries({ queryKey: ['characters'] });
       handleClose();
     },
     onError: (error) => {
