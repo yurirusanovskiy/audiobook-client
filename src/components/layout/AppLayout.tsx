@@ -11,7 +11,7 @@ import {
   Avatar,
   Tooltip,
 } from '@mui/material';
-import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
+import ClassOutlinedIcon from '@mui/icons-material/ClassOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutlined';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
@@ -26,14 +26,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const menuItems = [
-    { text: 'Projects', icon: <MenuBookOutlinedIcon />, path: '/' },
-    { text: 'Voices', icon: <RecordVoiceOverOutlinedIcon />, path: '/voices' },
+    { text: 'Projects', icon: <MenuBookOutlinedIcon fontSize="large" />, path: '/' },
+    { text: 'Voices', icon: <RecordVoiceOverOutlinedIcon fontSize="large" />, path: '/voices' },
     {
       text: 'Dictionary',
-      icon: <BookOutlinedIcon />,
+      icon: <ClassOutlinedIcon fontSize="large" />,
       path: '/dictionary',
     },
-    { text: 'Settings', icon: <SettingsOutlinedIcon />, path: '/settings' },
+    { text: 'Settings', icon: <SettingsOutlinedIcon fontSize="large" />, path: '/settings' },
   ];
 
   return (
