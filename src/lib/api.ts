@@ -272,3 +272,18 @@ export const settingsService = {
   deleteApiKey: (id: number) => api.delete(`/settings/api-keys/${id}`).then(res => res.data),
   activateApiKey: (id: number) => api.post(`/settings/api-keys/${id}/activate`).then(res => res.data),
 };
+
+export const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
+  'ru-RU': 'Русский',
+  'en-US': 'English (US)',
+  'en-GB': 'English (GB)',
+  'he-IL': 'עברית (Hebrew)',
+  'es-ES': 'Español',
+  'fr-FR': 'Français',
+  'de-DE': 'Deutsch',
+};
+
+export function getLanguageDisplayName(code?: string): string {
+  if (!code) return 'Unknown';
+  return LANGUAGE_DISPLAY_NAMES[code] || code;
+}

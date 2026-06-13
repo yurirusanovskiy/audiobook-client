@@ -17,7 +17,7 @@ import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { useQuery } from '@tanstack/react-query';
-import { projectService } from '@/lib/api';
+import { projectService, getLanguageDisplayName } from '@/lib/api';
 import UploadBookModal from '@/components/modals/UploadBookModal';
 import ManualProjectModal from '@/components/modals/ManualProjectModal';
 import ItemCard from '@/components/cards/ItemCard';
@@ -150,10 +150,7 @@ export default function ProjectsPage() {
                     description={`Создано ${new Date(project.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`}
                     chips={[
                       {
-                        label:
-                          project.language_code === 'ru-RU'
-                            ? 'Русский'
-                            : project.language_code || 'ru-RU',
+                        label: getLanguageDisplayName(project.language_code),
                       },
                     ]}
                     bottomContent={

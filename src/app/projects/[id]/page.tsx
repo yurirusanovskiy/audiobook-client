@@ -14,7 +14,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBackOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNoteOutlined';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { projectService, sceneService } from '@/lib/api';
+import { projectService, sceneService, getLanguageDisplayName } from '@/lib/api';
 import DeleteProjectModal from '@/components/modals/DeleteProjectModal';
 import CastingDirectorSection from '@/components/CastingDirectorSection';
 import ItemCard from '@/components/cards/ItemCard';
@@ -93,9 +93,7 @@ export default function ProjectDetailsPage() {
             {project?.title || 'Project Details'}
           </Typography>
           <Typography variant="body1" sx={{ color: '#94A3B8' }}>
-            {project?.language_code === 'ru-RU'
-              ? 'Русский'
-              : project?.language_code}{' '}
+            {getLanguageDisplayName(project?.language_code)}{' '}
             • {scenes?.length || 0} Scenes
           </Typography>
         </Box>
@@ -141,12 +139,21 @@ export default function ProjectDetailsPage() {
                         ? 'Draft'
                         : scene.status === 'extracted'
                           ? 'Script Extracted'
-                          : 'Completed',
+                          : scene.status === 'error'
+                            ? 'Error'
+                            : 'Completed',
                     bgcolor:
                       scene.status === 'completed'
                         ? 'rgba(76, 175, 80, 0.1)'
-                        : 'rgba(255,255,255,0.05)',
-                    color: scene.status === 'completed' ? '#4CAF50' : '#94A3B8',
+                        : scene.status === 'error'
+                          ? 'rgba(244, 67, 54, 0.1)'
+                          : 'rgba(255,255,255,0.05)',
+                    color:
+                      scene.status === 'completed'
+                        ? '#4CAF50'
+                        : scene.status === 'error'
+                          ? '#F44336'
+                          : '#94A3B8',
                   },
                 ]}
                 description={
