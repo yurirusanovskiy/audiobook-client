@@ -171,7 +171,7 @@ const LineEditor = ({
             </MenuItem>
             {characters.map((c) => (
               <MenuItem key={c.id} value={c.id} sx={{ fontWeight: 500 }}>
-                {c.name}
+                {c.alias || c.name}
               </MenuItem>
             ))}
           </Select>
@@ -791,12 +791,13 @@ export default function SceneEditorPage() {
         audioUrl={scene.audio_url ? getAudioUrl(scene.audio_url) : null}
         isGenerating={generateAudioMutation.isPending}
         onGenerate={() => generateAudioMutation.mutate()}
-        onDownloadStems={() =>
+        onDownloadStems={() => {
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
           window.open(
-            `http://127.0.0.1:8000/api/v1/scenes/${sceneId}/download-stems`,
+            `${backendUrl}/api/v1/scenes/${sceneId}/download-stems`,
             '_blank',
-          )
-        }
+          );
+        }}
       />
     </Box>
   );

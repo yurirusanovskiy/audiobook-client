@@ -281,6 +281,7 @@ export const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
   'es-ES': 'Español',
   'fr-FR': 'Français',
   'de-DE': 'Deutsch',
+  'ro-RO': 'Română',
 };
 
 export function getLanguageDisplayName(code?: string): string {

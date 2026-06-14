@@ -15,6 +15,7 @@ export function AudioPlayerBar({ audioUrl, isGenerating = false, onGenerate, onD
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Sync isPlaying state with actual audio playback
@@ -167,6 +168,11 @@ export function AudioPlayerBar({ audioUrl, isGenerating = false, onGenerate, onD
         
         <IconButton
           disabled={!isGenerated}
+          onClick={() => {
+            if (audioRef.current && totalDuration) {
+              audioRef.current.currentTime = Math.min(audioRef.current.currentTime + 10, totalDuration);
+            }
+          }}
           sx={{ 
             color: "#94a3b8",
             '&:hover': { bgcolor: "rgba(255,255,255,0.05)" },
@@ -181,8 +187,9 @@ export function AudioPlayerBar({ audioUrl, isGenerating = false, onGenerate, onD
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
         {/* Waveform visualization */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px', height: 32 }}>
-          {Array.from({ length: 80 }).map((_, i) => {
-            const h = 20 + Math.sin(i * 0.4) * 12 + Math.sin(i * 1.2) * 8 + Math.random() * 4;
+          {React.useMemo(() => Array.from({ length: 80 }).map((_, i) => (
+            20 + Math.sin(i * 0.4) * 12 + Math.sin(i * 1.2) * 8 + Math.random() * 4
+          )), []).map((h, i) => {
             const filled = isGenerated && (i / 80) * 100 <= progress;
             return (
               <Box
@@ -258,9 +265,10 @@ export function AudioPlayerBar({ audioUrl, isGenerating = false, onGenerate, onD
               const rect = e.currentTarget.getBoundingClientRect();
               const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
               audioRef.current.volume = pct;
+              setVolume(pct);
             }}
           >
-            <Box sx={{ height: '100%', borderRadius: 2, width: '75%', background: "#94a3b8" }} />
+            <Box sx={{ height: '100%', borderRadius: 2, width: `${volume * 100}%`, background: "#94a3b8" }} />
           </Box>
         </Box>
 
